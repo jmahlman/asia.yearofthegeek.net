@@ -291,12 +291,37 @@
   var us = L.marker(HOME, {
     icon: L.divIcon({
       className: 'dot land',
-      html: '<span class="base"></span><img class="us" src="' + US_IMG + '" alt="">',
+      html: '<span class="base"></span>' +
+        '<img class="us" src="' + US_IMG + '" alt="">' +
+        '<span class="bubble" aria-hidden="true">Hi!</span>',
       iconSize: [72, 84],
       iconAnchor: [36, 76]
     }),
     interactive: false, keyboard: false, zIndexOffset: 2000
   }).addTo(map);
+
+  /* ---------- SNES-style moves: a jump with a "!" ---------- */
+
+  var talkTimer, jumpTimer;
+  function usJump(talk) {
+    var el = us.getElement();
+    if (!el || reduceMotion) return;
+    el.classList.remove('hopping');
+    void el.offsetWidth; // restart the animation if it's mid-jump
+    el.classList.add('hopping');
+    clearTimeout(jumpTimer);
+    jumpTimer = setTimeout(function () { el.classList.remove('hopping'); }, 700);
+    if (talk) {
+      el.classList.add('talk');
+      clearTimeout(talkTimer);
+      talkTimer = setTimeout(function () { el.classList.remove('talk'); }, 1600);
+    }
+  }
+  // The marker isn't drawn until the map has a view, so listen on the map container.
+  document.getElementById('map').addEventListener('click', function (e) {
+    if (e.target.closest('.dot')) usJump(true);
+  });
+
 
   // On wide screens the cards sit on the left, so center things in the space to their right.
   // On narrow screens the focused card sits at the bottom instead, with the map showing above it.
@@ -369,6 +394,10 @@
     var center = offsetCenter(c, zoom, target);
     if (reduceMotion) map.setView(center, zoom);
     else map.flyTo(center, zoom, { duration: 1.6 });
+    // Landing on where we are right now: we say hi.
+    if (target.classList.contains('today')) {
+      map.once('moveend', function () { if (shown === target) setTimeout(function () { usJump(true); }, 150); });
+    }
   }
 
   map.fitBounds(tripPoints, { paddingTopLeft: [leftPad() + 60, 60], paddingBottomRight: [60, 60] });
@@ -794,19 +823,27 @@
   }
 
   function placeUs(t) {
-    var at = HOME, mode = 'land';
+    var at = HOME, mode = 'land', tile = null;
     var fl = flights.filter(function (f) { return t >= f.from && t < f.to; })[0];
     if (fl) {
       at = along(fl.route, (t - fl.from) / (fl.to - fl.from));
       mode = 'air';
     } else if (t >= start && t < end && todayDate) {
-      var tile = document.getElementById('day-' + todayDate).closest('.day');
+      tile = document.getElementById('day-' + todayDate).closest('.day');
       var route = parse(tile, 'route');
       at = parse(tile, 'coords') || (t < flights[1].from ? route[0] : route[route.length - 1]);
       mode = tile.getAttribute('data-mode');
     }
+    var el = us.getElement();
     us.setLatLng(at);
-    us.getElement().className = 'leaflet-marker-icon dot ' + mode;
+    el.classList.remove('land', 'sea', 'air');
+    el.classList.add(mode);
+    // The speech bubble says hello in the language of wherever we are.
+    var hello = { 'Asia/Seoul': ['안녕하세요!', 'ko'], 'Asia/Tokyo': ['こんにちは!', 'ja'] };
+    var say = (!fl && tile && hello[tile.getAttribute('data-tz')]) || ['Hi!', 'en'];
+    var bubble = el.querySelector('.bubble');
+    bubble.textContent = say[0];
+    bubble.lang = say[1];
     // Chibi from landing in Seoul until takeoff from Tokyo.
     setAvatar(t >= flights[0].to && t < flights[1].from ? US_ASIA : US_HOME);
   }

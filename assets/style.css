@@ -73,7 +73,7 @@ a { color: var(--sea); font-weight: 700; }
   image-rendering: pixelated;
   filter: drop-shadow(0 3px 4px rgba(35, 33, 58, 0.45));
   transform-origin: 50% 100%;
-  animation: bob 2.4s ease-in-out infinite;
+  animation: idle 1s steps(1) infinite;
 }
 .dot .base {
   position: absolute;
@@ -95,7 +95,7 @@ a { color: var(--sea); font-weight: 700; }
   inset: -4px;
   border-radius: 50%;
   border: 3px solid var(--land);
-  animation: ping 1.8s ease-out infinite;
+  animation: ping 1.6s steps(4) infinite;
 }
 .dot.sea .base::after { border-color: var(--sea); }
 .dot.air .base::after { border-color: var(--air); }
@@ -103,9 +103,59 @@ a { color: var(--sea); font-weight: 700; }
   0% { transform: scale(1); opacity: 0.8; }
   100% { transform: scale(2.6); opacity: 0; }
 }
-@keyframes bob {
-  0%, 100% { transform: translateY(0) rotate(-2deg); }
-  50% { transform: translateY(-5px) rotate(2deg); }
+/* SNES-style motion: whole art-pixels at a time (one pixel of the sprite is about 2px here),
+   a few frames per second, no smoothing in between. */
+@keyframes idle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+@keyframes us-jump {
+  0% { transform: translateY(0); }
+  12% { transform: translateY(-6px); }
+  25% { transform: translateY(-12px); }
+  38% { transform: translateY(-16px); }
+  50% { transform: translateY(-16px); }
+  62% { transform: translateY(-12px); }
+  75% { transform: translateY(-6px); }
+  88%, 100% { transform: translateY(0); }
+}
+
+.dot { pointer-events: auto; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.dot.hopping .us { animation: us-jump 0.7s steps(1) 1; }
+
+/* Speech bubble, pixel-bordered like an RPG text box */
+.dot .bubble {
+  position: absolute;
+  left: 50%;
+  bottom: 88px;
+  translate: -50% 0;
+  display: none;
+  padding: 8px 10px 7px;
+  background: #fff;
+  color: var(--ink);
+  font: 700 15px/1 "Nunito", system-ui, sans-serif;
+  white-space: nowrap;
+  box-shadow:
+    0 -3px 0 0 var(--ink), 0 3px 0 0 var(--ink),
+    -3px 0 0 0 var(--ink), 3px 0 0 0 var(--ink),
+    0 6px 0 0 rgba(35, 33, 58, 0.25);
+}
+.dot .bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  margin-left: -3px;
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  box-shadow: 0 3px 0 0 var(--ink), -3px 0 0 0 var(--ink), 3px 0 0 0 var(--ink);
+}
+.dot.talk .bubble { display: block; animation: bubble-pop 0.3s steps(1) 1; }
+@keyframes bubble-pop {
+  0% { transform: scale(0.5); }
+  33% { transform: scale(1.2); }
+  66%, 100% { transform: scale(1); }
 }
 
 /* The plain dot for the day being viewed */
@@ -494,7 +544,7 @@ button.cal-day:hover { transform: translateY(-2px); }
   height: auto;
   image-rendering: pixelated;
   filter: drop-shadow(0 2px 3px rgba(35, 33, 58, 0.4));
-  animation: hop 1.2s ease-in-out infinite;
+  animation: idle 1s steps(1) infinite;
 }
 .cal-num { font-weight: 700; font-size: 0.85rem; }
 .cal-emoji { font-size: 1.5rem; line-height: 1.1; }
@@ -526,7 +576,7 @@ button.cal-day:hover { transform: translateY(-2px); }
 
 @media (prefers-reduced-motion: reduce) {
   .hero, main, .scrim, .overview-hint, .cal-day, .stop span { transition: none; }
-  .stop .pin, .cal-pin, .dot .us, .dot .base::after { animation: none; }
+  .stop .pin, .cal-pin, .dot .us, .dot .base::after, .dot .bubble { animation: none !important; }
 }
 .tools button[hidden] { display: none; }
 
@@ -888,3 +938,7 @@ main { padding-bottom: calc(20vh + 80px); }
   .viewer-nav.next { right: 6px; }
   .viewer-strip button { width: 52px; height: 52px; }
 }
+
+/* Let taps reach the map (and us on it) through the empty space around the tiles */
+.hero, main { pointer-events: none; }
+.hero-panel, main .card, main footer { pointer-events: auto; }

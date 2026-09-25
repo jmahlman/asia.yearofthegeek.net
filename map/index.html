@@ -1,0 +1,17 @@
+---
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{{ site.title }}</title>
+  <!-- The timeline moved to the home page. Keep old /map/ links working, including ?date= and #day- links. -->
+  <meta http-equiv="refresh" content="0; url={{ '/' | relative_url }}">
+  <link rel="canonical" href="{{ '/' | absolute_url }}">
+  <script>location.replace('{{ "/" | relative_url }}' + location.search + location.hash);</script>
+</head>
+<body>
+  <p>The trip timeline moved to <a href="{{ '/' | relative_url }}">the home page</a>.</p>
+</body>
+</html>

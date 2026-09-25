@@ -2,7 +2,7 @@
 
 A day-by-day tracker for our Korea and Japan trip (Sep 29 to Oct 20, 2026), so family and friends can see where we are, what we're up to, and what time it is for us.
 
-It's a plain Jekyll site with no plugins, so GitHub Pages builds it on its own. The timeline lives at **`/map/`** (built from `index.html`).
+It's a plain Jekyll site with no plugins, so GitHub Pages builds it on its own. The timeline is the home page (built from `index.html`). Old `/map/` links redirect there.
 
 ## What's on the page
 
@@ -83,7 +83,7 @@ Needs Docker.
 docker compose up -d
 ```
 
-Open http://localhost:4000/map/. Edits to `_data/days.yml`, `index.html` and `assets/` rebuild automatically. Refresh if the page doesn't update. Changes to `_config.yml` need a restart:
+Open http://localhost:4000/. Edits to `_data/days.yml`, `index.html` and `assets/` rebuild automatically. Refresh if the page doesn't update. Changes to `_config.yml` need a restart:
 
 ```bash
 docker compose restart jekyll

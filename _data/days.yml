@@ -230,10 +230,14 @@
   tz: Asia/Tokyo
   coords: [35.0150, 138.5000]
   title: Mt Fuji (Shimizu), Japan
-  blurb: Fuji-san, please come out from behind the clouds. We came a long way.
+  blurb: Fuji-san, please come out from behind the clouds. We came a long way. Off to Hakone to ride the ropeway and cruise Lake Ashi for our best shot at a view.
   schedule:
     - time: "7:00 AM"
       what: Arrive in port
+    - time: "Excursion"
+      what: Hakone Ropeway, gliding over the steaming vents of Owakudani
+    - time: "Excursion"
+      what: Boat cruise across Lake Ashi
     - time: "6:00 PM"
       what: Ship sails
   port: Shimizu Port, Shizuoka, Japan

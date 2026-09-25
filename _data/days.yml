@@ -145,7 +145,7 @@
   tz: Asia/Tokyo
   coords: [33.6030, 130.4020]
   title: Fukuoka, Japan
-  blurb: Hello, Japan! Ramen capital of the world. Swapped in for Kumamoto after an earthquake closed that port.
+  blurb: Konnichiwa, Japan! Ramen capital of the world. Swapped in for Kumamoto after an earthquake closed that port.
   schedule:
     - time: "7:00 AM"
       what: Arrive in port
@@ -238,16 +238,18 @@
   tz: Asia/Tokyo
   coords: [35.0150, 138.5000]
   title: Mt Fuji (Shimizu), Japan
-  blurb: Fuji-san, please come out from behind the clouds. We came a long way. Off to Hakone to ride the ropeway and cruise Lake Ashi for our best shot at a view.
+  blurb: Fuji-san, please come out from behind the clouds. We came a long way. Off to Hakone National Park, where on a clear day you get two Fujis, one in the sky and one reflected in Lake Ashi.
   schedule:
     - time: "7:00 AM"
       what: Arrive in port
     - time: "8:00 AM"
-      what: Hakone excursion sets off (6 to 8 hours)
+      what: Hakone excursion sets off, with a nearly 2 hour coach ride (6 to 8 hours total)
     - time: "Then"
-      what: Hakone Ropeway, gliding over the steaming vents of Owakudani
+      what: Hakone Ropeway over Owakudani Valley's boiling, smoking hot springs
     - time: "Then"
-      what: Boat cruise across Lake Ashi
+      what: Hakone Shrine, tucked into the mountains by the lake
+    - time: "Then"
+      what: Lake Ashi views, hoping for Fuji in the lake's mirror
     - time: "Afternoon"
       what: Back on board
     - time: "6:00 PM"
@@ -261,7 +263,7 @@
   tz: Asia/Tokyo
   coords: [35.4517, 139.6475]
   title: Tokyo (Yokohama), Japan
-  blurb: Last night on the boat. Saying goodbye to the towel animals.
+  blurb: Last night on the boat. Saying goodbye to the buffet and free mocktails.
   schedule:
     - time: "7:30 AM"
       what: Arrive in port

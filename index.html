@@ -44,6 +44,25 @@
 
 <p class="overview-hint" id="overview-hint">Tap a stop to zoom in. Drag and zoom to explore.</p>
 
+<dialog class="viewer" id="viewer" aria-label="Photos">
+  <button type="button" class="viewer-close" id="viewer-close" aria-label="Close photos">✕</button>
+  <p class="viewer-title" id="viewer-title"></p>
+  <div class="viewer-stage">
+    <button type="button" class="viewer-nav prev" id="viewer-prev" aria-label="Previous photo">‹</button>
+    <figure class="viewer-figure">
+      <img id="viewer-img" alt="">
+      <figcaption>
+        <span class="viewer-caption" id="viewer-caption"></span>
+        <span class="viewer-meta" id="viewer-meta"></span>
+      </figcaption>
+    </figure>
+    <button type="button" class="viewer-nav next" id="viewer-next" aria-label="Next photo">›</button>
+  </div>
+  <div class="viewer-strip" id="viewer-strip"></div>
+</dialog>
+
+<script type="application/json" id="photos-data">{{ site.data.photos | jsonify }}</script>
+
 <dialog class="calendar" id="calendar" aria-labelledby="calendar-title">
   <div class="cal-head">
     <h2 id="calendar-title">The whole trip</h2>
@@ -148,6 +167,12 @@
           <p>😴 Sleeping: <strong>{{ w.sleeping }}</strong></p>
           {% endif %}
         </div>
+        {% endif %}
+        {% assign tile_photos = site.data.photos | where_exp: "p", "gdates contains p.day" %}
+        {% if tile_photos.size > 0 %}
+        <button type="button" class="photos-btn" data-dates="{{ gdates | strip }}">
+          <span aria-hidden="true">📷</span> Show pictures <span class="photos-count">{{ tile_photos.size }}</span>
+        </button>
         {% endif %}
       </div>
     </li>
@@ -834,6 +859,87 @@
     finale.querySelector('[data-stat="miles"]').textContent = (Math.round(flown / 100) * 100).toLocaleString();
     finale.querySelector('[data-stat="countries"]').textContent = Object.keys(countries).length;
   }
+
+  /* ---------- Photos: "Show pictures" opens a viewer for that tile ---------- */
+
+  var photos = [];
+  try { photos = JSON.parse(document.getElementById('photos-data').textContent) || []; } catch (e) { photos = []; }
+  var viewer = document.getElementById('viewer');
+  var vImg = document.getElementById('viewer-img');
+  var vCaption = document.getElementById('viewer-caption');
+  var vMeta = document.getElementById('viewer-meta');
+  var vTitle = document.getElementById('viewer-title');
+  var vStrip = document.getElementById('viewer-strip');
+  var set = [], at = 0;
+  var baseUrl = {{ site.baseurl | jsonify }};
+
+  function photoUrl(path) { return /^https?:/.test(path) ? path : baseUrl + path; }
+
+  function showPhoto(i) {
+    at = (i + set.length) % set.length;
+    var p = set[at];
+    vImg.src = photoUrl(p.src);
+    vImg.width = p.w; vImg.height = p.h;
+    vImg.alt = p.caption || 'Photo from ' + p.day;
+    vCaption.textContent = p.caption || '';
+    // Show the time as the phone saw it where the photo was taken ("2026-10-01T19:05+09:00" -> Thu, Oct 1, 7:05 PM).
+    var t = p.taken.match(/^(\d+)-(\d+)-(\d+)T(\d+):(\d+)/);
+    var when = t ? fmt(Date.UTC(+t[1], t[2] - 1, +t[3], +t[4], +t[5]), 'UTC',
+      { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : p.day;
+    vMeta.textContent = [when, p.by && 'by ' + p.by, (at + 1) + ' of ' + set.length].filter(Boolean).join(' · ');
+    Array.prototype.forEach.call(vStrip.children, function (b, k) {
+      b.classList.toggle('on', k === at);
+      if (k === at) b.scrollIntoView({ block: 'nearest', inline: 'center' });
+    });
+    // Warm up the next one so swiping feels instant.
+    if (set.length > 1) new Image().src = photoUrl(set[(at + 1) % set.length].src);
+    viewer.classList.toggle('single', set.length === 1);
+  }
+
+  function openPhotos(tile, dates) {
+    set = photos.filter(function (p) { return dates.indexOf(p.day) !== -1; })
+      .sort(function (a, b) { return Date.parse(a.taken) - Date.parse(b.taken); });
+    if (!set.length) return;
+    vTitle.textContent = tile.querySelector('h2').textContent;
+    vStrip.innerHTML = '';
+    set.forEach(function (p, k) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Photo ' + (k + 1) + (p.caption ? ': ' + p.caption : ''));
+      b.innerHTML = '<img alt="" loading="lazy">';
+      b.firstChild.src = photoUrl(p.thumb || p.src);
+      b.addEventListener('click', function () { showPhoto(k); });
+      vStrip.appendChild(b);
+    });
+    viewer.showModal();
+    showPhoto(0);
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.photos-btn'), function (btn) {
+    btn.addEventListener('click', function () {
+      openPhotos(btn.closest('.day'), btn.getAttribute('data-dates').split(' '));
+    });
+  });
+  document.getElementById('viewer-prev').addEventListener('click', function () { showPhoto(at - 1); });
+  document.getElementById('viewer-next').addEventListener('click', function () { showPhoto(at + 1); });
+  document.getElementById('viewer-close').addEventListener('click', function () { viewer.close(); });
+  viewer.addEventListener('click', function (e) { if (e.target === viewer) viewer.close(); });
+  viewer.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') showPhoto(at - 1);
+    if (e.key === 'ArrowRight') showPhoto(at + 1);
+  });
+  viewer.addEventListener('close', function () { vImg.removeAttribute('src'); });
+
+  // Swipe left and right on phones.
+  var swipeX = null;
+  vImg.addEventListener('pointerdown', function (e) { swipeX = e.clientX; });
+  vImg.addEventListener('pointerup', function (e) {
+    if (swipeX === null) return;
+    var dx = e.clientX - swipeX;
+    swipeX = null;
+    if (Math.abs(dx) > 40) showPhoto(at + (dx < 0 ? 1 : -1));
+  });
+  vImg.addEventListener('dragstart', function (e) { e.preventDefault(); });
 
   markToday();
   buildCalendar();

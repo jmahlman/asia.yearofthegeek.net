@@ -8,6 +8,7 @@ exclude:
   - Gemfile.lock
   - vendor
   - docker-compose.yml
+  - scripts
 
 # Background photo on sea days
 ship_photo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Celebrity_Millennium_at_Kurushima_Strait.jpg/1920px-Celebrity_Millennium_at_Kurushima_Strait.jpg"

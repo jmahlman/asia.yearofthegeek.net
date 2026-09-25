@@ -18,6 +18,7 @@ It's a plain Jekyll site with no plugins, so GitHub Pages builds it on its own. 
 - **Time zone help on every tile.** For example: "Japan time, 13 hours ahead of you. Noon there is 11:00 PM the day before for you." Each schedule time also shows the reader's own time underneath, such as "Thu, Oct 8, 6:00 PM your time".
 - **Today.** During the trip, the page opens on today's tile. It's highlighted yellow and marked "We are here!", and the header says where we are.
 - **After the trip.** Once we've landed back in Philly, the header says we made it home, and a **We're home!** wrap-up tile appears at the end with trip stats (days, countries, ports, days at sea, miles flown, parties). The map zooms to Philly with us standing at home. This tile is the natural spot to add trip photos later.
+- **Photos.** Tiles with photos get a **📷 Show pictures** button that opens a full-screen viewer (swipe or arrow keys, captions, who took it). Tiles without photos show nothing. See [Photos](#photos) below.
 - **Parties.** A day with `celebrate:` gets a banner, plus confetti and balloons when it scrolls into focus (Alessa's 40th on Oct 6).
 - **Phones and narrow windows (under 900px).** A "story map" layout: the focused tile sits at the bottom of the screen with the map showing above it. Details fold behind a **Show details** / **Show all N days** button.
 
@@ -72,6 +73,28 @@ If the flights change, update these in the script at the bottom of `index.html`:
 - `HOME`: Philly's coordinates, where the avatar waits before and after the trip
 - "Today" follows the Korea/Japan calendar (UTC+9)
 
+## Photos
+
+Photos come from the **"Asia 2026" iCloud Shared Album** (Public Website turned on). Add photos from the Photos app as usual; they land on the day they were taken.
+
+- A GitHub Action (`.github/workflows/sync-photos.yml`) runs `scripts/sync_photos.py` every 8 hours. To run it right away, go to the **Actions** tab > **Sync photos from iCloud** > **Run workflow**.
+- Each photo is filed by the local date and time the phone recorded when it was taken. Photos from outside the trip dates are skipped.
+- Photos are resized (1600px plus a 480px thumbnail) and all metadata, including GPS location, is stripped. They're saved to `assets/photos/`, and `_data/photos.json` lists them.
+- **Captions:** the comment typed when adding photos to the album becomes the caption. It applies to every photo added in that batch, so add photos one at a time to caption them separately.
+- **Removing a photo:** delete it from the shared album (or hide it). It comes off the site on the next sync.
+- **Who can publish:** only the album owner, unless the `PHOTO_UPLOADERS` repository variable lists iCloud user IDs (comma-separated). The sync log prints the ID of anyone whose photos were skipped, so they can be added.
+- Videos are skipped for now. Live Photos show as stills.
+
+Setup: the album link is stored as the repository secret `ICLOUD_ALBUM_URL` (Settings > Secrets and variables > Actions).
+
+Run it locally:
+
+```bash
+ICLOUD_ALBUM_URL="<album link>" uv run scripts/sync_photos.py
+```
+
+Add `--pretend-day 2026-10-02` to put photos taken outside the trip on that day, for testing. Don't commit those results.
+
 ## Previewing
 
 - **Any day as "today":** add `?date=2026-10-06` to the URL. It moves the highlight, the avatar and the clocks (set to noon that day).
@@ -110,6 +133,7 @@ GitHub Pages builds with its own older Jekyll instead of the Gemfile's version. 
 | Avatar | `assets/img/us.png` |
 | Map | [Leaflet](https://leafletjs.com/) with Esri World Topo tiles |
 | Confetti | [canvas-confetti](https://github.com/catdad/canvas-confetti) |
+| Photo sync | `scripts/sync_photos.py` + `.github/workflows/sync-photos.yml` |
 
 Leaflet, canvas-confetti and the fonts load from CDNs. Nothing else is needed.
 

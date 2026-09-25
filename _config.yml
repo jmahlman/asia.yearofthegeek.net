@@ -1,0 +1,17 @@
+title: "Kimchi, Katsu & a Very Big Boat"
+description: "Where we are every day of our Korea and Japan trip. Sep 29 to Oct 20, 2026."
+url: "https://asia.yearofthegeek.net"
+baseurl: ""
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - docker-compose.yml
+
+# Background photo on sea days
+ship_photo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Celebrity_Millennium_at_Kurushima_Strait.jpg/1920px-Celebrity_Millennium_at_Kurushima_Strait.jpg"
+ship_credit: 'Ship photo: <a href="https://commons.wikimedia.org/wiki/File:Celebrity_Millennium_at_Kurushima_Strait.jpg" target="_blank" rel="noopener">Spaceaero2</a>, CC BY-SA 3.0'
+
+# Who the "their time" clock is for
+travelers: "John and Alessa"

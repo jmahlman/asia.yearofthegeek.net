@@ -1,0 +1,312 @@
+# One entry per day. mode is land, sea, or air.
+# coords is [lat, lng] for the map dot. Air days use route instead: a list of stops.
+# Sea days show the ship photo in the background instead of the map.
+# tz is the time zone the schedule times are in. A schedule item can override it
+# with its own tz (and date, if it lands on a different calendar day).
+# celebrate (plus optional celebrate_note) throws a party on that day.
+# Times are local to wherever we are.
+
+- date: 2026-09-29
+  emoji: "✈️"
+  mode: air
+  tz: America/New_York
+  route: [[39.8744, -75.2424], [47.4502, -122.3088], [37.4602, 126.4407]]  # PHL, SEA, ICN
+  title: Philly to Seattle to Seoul
+  blurb: Roughly one billion hours of airplane. We lose a whole day to the date line and nobody gives it back until Oct 20.
+  schedule:
+    - time: "7:05 AM"
+      what: Delta 2092 leaves Philadelphia
+      link: https://www.flightaware.com/live/flight/DAL2092
+    - time: "10:04 AM"
+      what: Land in Seattle, stretch legs
+      tz: America/Los_Angeles
+    - time: "1:00 PM"
+      what: Delta 197 leaves Seattle
+      link: https://www.flightaware.com/live/flight/DAL197
+      tz: America/Los_Angeles
+    - time: "4:50 PM"
+      what: Land at Incheon (on Wednesday!)
+      tz: Asia/Seoul
+      date: 2026-09-30
+  sleeping: On a plane, badly
+
+- date: 2026-09-30
+  emoji: "🛬"
+  mode: land
+  tz: Asia/Seoul
+  coords: [37.5345, 126.9937]
+  title: Seoul, South Korea
+  blurb: Land, find the hotel, pretend we are not jet lagged.
+  schedule:
+    - time: "4:50 PM"
+      what: Touch down at Incheon
+    - time: "Evening"
+      what: Check in at the hotel
+  stay: &mondrian
+    name: Mondrian Seoul Itaewon
+    address: 23 Jangmun-ro, Yongsan-gu, Seoul 04392, South Korea
+    phone: "+82 2-2076-2000"
+
+- date: 2026-10-01
+  emoji: "🍗"
+  mode: land
+  tz: Asia/Seoul
+  coords: [37.5345, 126.9937]
+  title: Seoul, South Korea
+  blurb: Free day. Korean fried chicken is on the agenda. So is more Korean fried chicken.
+  stay: *mondrian
+
+- date: 2026-10-02
+  emoji: "🏯"
+  mode: land
+  tz: Asia/Seoul
+  coords: [37.5345, 126.9937]
+  title: Seoul, South Korea
+  blurb: Palaces, markets, snacks. The official plan is mostly vibes.
+  stay: *mondrian
+
+- date: 2026-10-03
+  emoji: "🧳"
+  mode: land
+  tz: Asia/Seoul
+  coords: [37.5345, 126.9937]
+  title: Seoul, South Korea
+  blurb: Pack up the fancy hotel.
+  schedule:
+    - time: "11:00 AM"
+      what: Check out of the Mondrian
+
+- date: 2026-10-04
+  emoji: "🛏️"
+  mode: land
+  tz: Asia/Seoul
+  coords: [37.5363, 126.7236]
+  title: Incheon, South Korea
+  blurb: A cozy night near the port so we do not miss the boat. Literally.
+  schedule:
+    - time: "5:00 PM"
+      what: Check in at Stay Jakjeon
+  stay: &jakjeon
+    name: Stay Jakjeon
+    address: 1F, 8-1 Hyoseo-ro 229beon-gil, Gyeyang-gu, Incheon 21047, South Korea
+    phone: "+82 10-4371-4387"
+
+- date: 2026-10-05
+  emoji: "🚢"
+  mode: land
+  tz: Asia/Seoul
+  coords: [37.3409, 126.6030]
+  title: Incheon, South Korea
+  blurb: BOAT DAY. The ship leaves at 5 with or without us. Hopefully with.
+  schedule:
+    - time: "By 11:00 AM"
+      what: Check out of Stay Jakjeon
+    - time: "Midday"
+      what: Board Celebrity Millennium
+    - time: "5:00 PM"
+      what: Anchors aweigh
+  port: Incheon Port International Cruise Terminal, Incheon, South Korea
+  sleeping: Celebrity Millennium
+
+- date: 2026-10-06
+  emoji: "🎂"
+  mode: sea
+  tz: Asia/Seoul
+  coords: [34.9, 125.9]  # somewhere in the Yellow Sea
+  title: At sea
+  blurb: Nothing but ocean. Conducting a thorough investigation of the buffet, and the cake.
+  # celebrate adds a party banner, balloons, and confetti to the day
+  celebrate: Happy birthday, Alessa!
+  celebrate_note: The big 4-0, in the middle of the sea. There will be "celebrating" on board.
+  sleeping: Celebrity Millennium
+
+- date: 2026-10-07
+  emoji: "🍊"
+  mode: land
+  tz: Asia/Seoul
+  coords: [33.5205, 126.5430]
+  title: Jeju Island, South Korea
+  blurb: A volcanic island famous for tangerines. We will be eating tangerines.
+  schedule:
+    - time: "7:00 AM"
+      what: Arrive in port
+    - time: "5:00 PM"
+      what: Ship sails
+  port: Jeju Island, South Korea
+  sleeping: Celebrity Millennium
+
+- date: 2026-10-08
+  emoji: "🍜"
+  mode: land
+  tz: Asia/Tokyo
+  coords: [33.6030, 130.4020]
+  title: Fukuoka, Japan
+  blurb: Hello, Japan! Ramen capital of the world. Swapped in for Kumamoto after an earthquake closed that port.
+  schedule:
+    - time: "7:00 AM"
+      what: Arrive in port
+    - time: "4:00 PM"
+      what: Ship sails
+  port: Hakata Port, Fukuoka, Japan
+  sleeping: Celebrity Millennium
+
+- date: 2026-10-09
+  emoji: "🌋"
+  mode: land
+  tz: Asia/Tokyo
+  coords: [31.5660, 130.5690]
+  title: Kagoshima, Japan
+  blurb: A city with an active volcano right across the bay. Totally normal.
+  schedule:
+    - time: "7:00 AM"
+      what: Arrive in port
+    - time: "4:00 PM"
+      what: Ship sails
+  port: Kagoshima Port, Kagoshima, Japan
+  sleeping: Celebrity Millennium
+
+- date: 2026-10-10
+  emoji: "🕊️"
+  mode: land
+  tz: Asia/Tokyo
+  coords: [34.3510, 132.4640]
+  title: Hiroshima, Japan
+  blurb: A quiet afternoon at the Peace Memorial, then a late sailaway.
+  schedule:
+    - time: "11:30 AM"
+      what: Arrive in port
+    - time: "9:00 PM"
+      what: Ship sails
+  port: Hiroshima Port, Hiroshima, Japan
+  sleeping: Celebrity Millennium
+
+- date: 2026-10-11
+  emoji: "🌊"
+  mode: sea
+  tz: Asia/Tokyo
+  coords: [33.9, 134.3]  # somewhere off Shikoku
+  title: At sea
+  blurb: Sailing toward Osaka. Napping at a professional level.
+  sleeping: Celebrity Millennium
+
+- date: 2026-10-12
+  emoji: "⛩️"
+  mode: land
+  tz: Asia/Tokyo
+  coords: [34.6556, 135.4306]
+  title: Kyoto and Osaka, Japan
+  blurb: The ship stays overnight, so we get two whole days. Temples by day, takoyaki by night.
+  schedule:
+    - time: "8:00 AM"
+      what: Arrive in port
+  port: Port of Osaka, Osaka, Japan
+  sleeping: Celebrity Millennium
+
+- date: 2026-10-13
+  emoji: "🐙"
+  mode: land
+  tz: Asia/Tokyo
+  coords: [34.6556, 135.4306]
+  title: Kyoto and Osaka, Japan
+  blurb: Round two. More takoyaki. The octopus never saw it coming.
+  schedule:
+    - time: "8:00 PM"
+      what: Ship sails
+  port: Port of Osaka, Osaka, Japan
+  sleeping: Celebrity Millennium
+
+- date: 2026-10-14
+  emoji: "🌊"
+  mode: sea
+  tz: Asia/Tokyo
+  coords: [33.9, 137.4]  # somewhere off the Kii Peninsula
+  title: At sea
+  blurb: Heading for Mt Fuji. Staring meaningfully at the horizon.
+  sleeping: Celebrity Millennium
+
+- date: 2026-10-15
+  emoji: "🗻"
+  mode: land
+  tz: Asia/Tokyo
+  coords: [35.0150, 138.5000]
+  title: Mt Fuji (Shimizu), Japan
+  blurb: Fuji-san, please come out from behind the clouds. We came a long way.
+  schedule:
+    - time: "7:00 AM"
+      what: Arrive in port
+    - time: "6:00 PM"
+      what: Ship sails
+  port: Shimizu Port, Shizuoka, Japan
+  sleeping: Celebrity Millennium
+
+- date: 2026-10-16
+  emoji: "🌃"
+  mode: land
+  tz: Asia/Tokyo
+  coords: [35.4517, 139.6475]
+  title: Tokyo (Yokohama), Japan
+  blurb: Last night on the boat. Saying goodbye to the towel animals.
+  schedule:
+    - time: "7:30 AM"
+      what: Arrive in port
+  port: Port of Yokohama, Yokohama, Japan
+  sleeping: Celebrity Millennium
+
+- date: 2026-10-17
+  emoji: "🏙️"
+  mode: land
+  tz: Asia/Tokyo
+  coords: [35.6275, 139.7430]
+  title: Tokyo, Japan
+  blurb: Off the ship and into Tokyo. The hotel is next to Shinagawa Station for maximum train chaos.
+  schedule:
+    - time: "Morning"
+      what: Leave the ship
+    - time: "3:00 PM"
+      what: Check in at The Strings
+  stay: &strings
+    name: The Strings by InterContinental Tokyo
+    address: Shinagawa East One Tower 26F, 2-16-1 Konan, Minato-ku, Tokyo 108-8282, Japan
+    phone: "+81 3-5783-1111"
+
+- date: 2026-10-18
+  emoji: "🍣"
+  mode: land
+  tz: Asia/Tokyo
+  coords: [35.6275, 139.7430]
+  title: Tokyo, Japan
+  blurb: Free day. Sushi, vending machines, getting lost on purpose.
+  stay: *strings
+
+- date: 2026-10-19
+  emoji: "🛍️"
+  mode: land
+  tz: Asia/Tokyo
+  coords: [35.6275, 139.7430]
+  title: Tokyo, Japan
+  blurb: Last full day. Shopping for an extra suitcase to hold the snacks.
+  stay: *strings
+
+- date: 2026-10-20
+  emoji: "🏠"
+  mode: air
+  tz: Asia/Tokyo
+  route: [[35.5494, 139.7798], [33.6407, -84.4277], [39.8744, -75.2424]]  # HND, ATL, PHL
+  title: Tokyo to Atlanta to Philly
+  blurb: We land in Atlanta before we left Tokyo. Time travel is real. The day we lost comes back.
+  schedule:
+    - time: "By noon"
+      what: Check out of The Strings
+    - time: "3:15 PM"
+      what: Delta 294 leaves Tokyo Haneda
+      link: https://www.flightaware.com/live/flight/DAL294
+    - time: "2:41 PM"
+      what: Land in Atlanta, same day somehow
+      tz: America/New_York
+    - time: "4:20 PM"
+      what: Delta 1329 leaves Atlanta
+      link: https://www.flightaware.com/live/flight/DAL1329
+      tz: America/New_York
+    - time: "6:19 PM"
+      what: Home in Philly. Wawa run.
+      tz: America/New_York

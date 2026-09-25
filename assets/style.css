@@ -1,0 +1,717 @@
+:root {
+  --bg: #FFF8EC;
+  --ink: #23213A;
+  --soft: #6B6880;
+  --card: #FFFFFF;
+  --land: #34A36B;
+  --sea: #2F80ED;
+  --air: #E0529C;
+  --today: #FFD23F;
+  --panel: min(620px, 46vw);
+}
+
+* { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Nunito", system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+h1, h2 { font-family: "Fredoka", "Nunito", sans-serif; font-weight: 700; }
+
+a { color: var(--sea); font-weight: 700; }
+
+/* Background: map, ship photo, and a wash so the cards stay readable */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: var(--bg);
+}
+#map { position: absolute; inset: 0; z-index: 0; background: #E8EEF1; pointer-events: none; }
+#map .leaflet-control-attribution { pointer-events: auto; background: rgba(255, 255, 255, 0.75); }
+
+.ship {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: 70% center;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+.ship.show { opacity: 1; }
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+    rgba(255, 248, 236, 0.92) 0,
+    rgba(255, 248, 236, 0.7) calc(var(--panel) + 4vw),
+    rgba(255, 248, 236, 0) calc(var(--panel) + 18vw));
+}
+
+/* The "you are here" tracker: John and Alessa standing on the spot */
+.dot .us {
+  position: absolute;
+  left: 0;
+  bottom: 8px;
+  width: 72px !important; /* Leaflet forces marker images to width: auto */
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 3px 4px rgba(35, 33, 58, 0.45));
+  transform-origin: 50% 100%;
+  animation: bob 2.4s ease-in-out infinite;
+}
+.dot .base {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 26px;
+  height: 14px;
+  margin-left: -13px;
+  border-radius: 50%;
+  background: var(--land);
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(35, 33, 58, 0.35);
+}
+.dot.sea .base { background: var(--sea); }
+.dot.air .base { background: var(--air); }
+.dot .base::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 3px solid var(--land);
+  animation: ping 1.8s ease-out infinite;
+}
+.dot.sea .base::after { border-color: var(--sea); }
+.dot.air .base::after { border-color: var(--air); }
+@keyframes ping {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-5px) rotate(2deg); }
+}
+
+/* The plain dot for the day being viewed */
+.spot span {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--land);
+  border: 4px solid #fff;
+  box-shadow: 0 2px 8px rgba(35, 33, 58, 0.35);
+}
+.spot.sea span { background: var(--sea); }
+.spot.air span { background: var(--air); }
+.spot { transition: opacity 0.3s; }
+
+/* Small inline version for buttons and labels */
+.us-icon {
+  height: 1.35em;
+  width: auto;
+  vertical-align: -0.35em;
+  image-rendering: pixelated;
+}
+
+/* Everything else floats above the backdrop, in a column on the left */
+.hero, main {
+  position: relative;
+  z-index: 1;
+  width: var(--panel);
+  margin-left: 4vw;
+}
+
+/* Header */
+.hero {
+  min-height: 92vh;
+  display: flex;
+  align-items: center;
+  padding: 40px 0;
+}
+.hero-panel { text-align: center; width: 100%; }
+.boat { font-size: 2.2rem; margin: 0; letter-spacing: 0.2em; }
+.hero h1 {
+  font-size: clamp(2.4rem, 5.5vw, 4rem);
+  line-height: 1.05;
+  margin: 12px auto;
+  max-width: 14ch;
+}
+.status { font-size: 1.2rem; margin: 0 0 16px; }
+.jump {
+  display: inline-block;
+  background: var(--ink);
+  color: #fff;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 999px;
+}
+.jump[hidden] { display: none; }
+
+/* Legend */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  justify-content: center;
+  font-weight: 700;
+  margin: 24px 0 0;
+}
+.key { padding: 2px 12px; border-radius: 999px; color: #fff; }
+.key.land { background: var(--land); }
+.key.sea { background: var(--sea); }
+.key.air { background: var(--air); }
+.tiny { flex-basis: 100%; text-align: center; font-weight: 400; color: var(--soft); font-size: 0.9rem; }
+
+/* Timeline */
+main { padding: 0 0 20vh; }
+.timeline { list-style: none; margin: 0; padding: 0; }
+
+.day {
+  --f: 1;
+  position: relative;
+  padding: 0 0 14vh 76px;
+}
+/* the line between nodes, styled by what we're doing that day */
+.day::before {
+  content: "";
+  position: absolute;
+  left: 30px;
+  top: 0;
+  bottom: 0;
+  border-left: 6px solid var(--land);
+  opacity: calc(0.35 + 0.65 * var(--f));
+}
+.day.sea::before { border-left-style: dashed; border-color: var(--sea); }
+.day.air::before { border-left-style: dotted; border-color: var(--air); }
+
+.node {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  margin-top: calc(-7vh - 33px);
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  background: var(--land);
+  border: 5px solid var(--bg);
+  opacity: calc(0.35 + 0.65 * var(--f));
+  transform: scale(calc(0.8 + 0.2 * var(--f)));
+}
+.day.sea .node { background: var(--sea); }
+.day.air .node { background: var(--air); }
+
+.card {
+  background: var(--card);
+  border-radius: 24px;
+  padding: 32px 36px;
+  min-height: clamp(320px, 50vh, 580px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 12px 40px rgba(35, 33, 58, 0.14);
+  scroll-snap-align: center;
+  opacity: calc(0.12 + 0.88 * var(--f));
+  transform: scale(calc(0.92 + 0.08 * var(--f)));
+  transform-origin: left center;
+  will-change: opacity, transform;
+}
+
+.when {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  color: var(--soft);
+  font-size: 1rem;
+}
+.when strong { color: var(--ink); }
+.here-tag { display: none; font-weight: 700; color: var(--ink); }
+
+.card h2 { font-size: clamp(1.8rem, 3vw, 2.5rem); line-height: 1.1; margin: 8px 0 8px; }
+.blurb { margin: 0 0 18px; font-size: 1.12rem; }
+
+/* Several days in one place: one section per day */
+.sub h3 {
+  font-family: "Fredoka", "Nunito", sans-serif;
+  font-weight: 500;
+  font-size: 1.1rem;
+  margin: 0 0 4px;
+}
+.sub + .sub { border-top: 2px dashed rgba(35, 33, 58, 0.12); padding-top: 14px; }
+.sub:has(h3) .blurb { margin-bottom: 14px; }
+.sub.today h3::after { content: " · today!"; font-weight: 700; }
+
+.sched {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 16px;
+}
+.sched li { display: contents; }
+.sched time { font-weight: 700; white-space: nowrap; }
+
+.where {
+  background: var(--bg);
+  border-radius: 14px;
+  padding: 10px 16px;
+  font-size: 0.98rem;
+}
+.where p { margin: 4px 0; }
+
+/* Today! */
+.day.today .card {
+  background: var(--today);
+  box-shadow: 0 0 0 5px var(--ink), 0 12px 40px rgba(35, 33, 58, 0.2);
+}
+.day.today .where { background: rgba(255, 255, 255, 0.6); }
+.day.today .sub + .sub { border-top-color: rgba(35, 33, 58, 0.2); }
+.day.today .here-tag { display: inline; }
+.day.today .node { animation: bounce 1.2s ease-in-out infinite; }
+@keyframes bounce {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -8px; }
+}
+
+footer {
+  text-align: center;
+  color: var(--soft);
+  font-size: 0.9rem;
+  padding: 0 20px;
+  background: rgba(255, 248, 236, 0.85);
+  border-radius: 14px;
+  padding: 12px 16px;
+}
+
+/* Narrow screens: one centered column, map shows through a lighter wash */
+@media (max-width: 899px) {
+  :root { --panel: auto; }
+  .hero, main { width: auto; max-width: 680px; margin: 0 auto; padding-left: 16px; padding-right: 16px; }
+  .hero-panel { background: rgba(255, 248, 236, 0.85); border-radius: 24px; padding: 24px 16px; }
+  .scrim { background: rgba(255, 248, 236, 0.35); }
+}
+
+@media (max-width: 480px) {
+  body { font-size: 17px; }
+  .day { padding-left: 56px; }
+  .day::before { left: 21px; }
+  .node { width: 48px; height: 48px; margin-top: calc(-7vh - 24px); font-size: 1.4rem; border-width: 4px; }
+  .card { padding: 22px 20px; min-height: 46vh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; scroll-snap-type: none; }
+  .day.today .node { animation: none; }
+  .card, .node { transform: none; }
+  .ship { transition: none; }
+}
+
+/* ---------- Top-right buttons ---------- */
+.tools {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 20;
+  display: flex;
+  gap: 8px;
+}
+.tools button {
+  font: 700 0.95rem "Nunito", system-ui, sans-serif;
+  color: #fff;
+  background: var(--ink);
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(35, 33, 58, 0.25);
+}
+.tools button:hover { background: #3a3760; }
+.tools button[aria-pressed="true"] { background: var(--today); color: var(--ink); }
+.tools button:focus-visible, .cal-day:focus-visible, .cal-close:focus-visible {
+  outline: 3px solid var(--sea);
+  outline-offset: 2px;
+}
+
+/* ---------- Overview mode: hide the cards, hand the map to the reader ---------- */
+.hero, main, .scrim { transition: opacity 0.4s ease; }
+body.is-overview { overflow: hidden; }
+body.is-overview .hero,
+body.is-overview main,
+body.is-overview .scrim { opacity: 0; pointer-events: none; }
+body.is-overview #map { pointer-events: auto; }
+
+.overview-hint {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 20;
+  translate: -50% 0;
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 4px 14px rgba(35, 33, 58, 0.2);
+  font-size: 0.92rem;
+  font-weight: 700;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+body.is-overview .overview-hint { opacity: 1; }
+
+.stop span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  background: var(--land);
+  border: 3px solid #fff;
+  box-shadow: 0 3px 10px rgba(35, 33, 58, 0.35);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.stop.sea span { background: var(--sea); }
+.stop.air span { background: var(--air); }
+.stop:hover span { transform: scale(1.15); }
+
+/* Where we are today */
+.stop .pin {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  translate: -50% 0;
+  width: 52px !important;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 2px 3px rgba(35, 33, 58, 0.4));
+  animation: hop 1.2s ease-in-out infinite;
+  pointer-events: none;
+}
+.stop.today span { box-shadow: 0 0 0 4px var(--today), 0 3px 10px rgba(35, 33, 58, 0.35); }
+@keyframes hop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.stop-popup { display: flex; flex-direction: column; gap: 2px; font: 0.95rem "Nunito", system-ui, sans-serif; min-width: 170px; }
+.stop-popup strong { font-family: "Fredoka", "Nunito", sans-serif; font-size: 1.1rem; }
+.stop-popup span { color: var(--soft); }
+.stop-popup .here { margin: 0 0 2px; font-weight: 700; }
+.stop-popup button {
+  margin-top: 8px;
+  font: 700 0.9rem "Nunito", system-ui, sans-serif;
+  color: #fff;
+  background: var(--ink);
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+.leaflet-tooltip { font: 700 0.9rem "Nunito", system-ui, sans-serif; }
+
+/* ---------- Calendar ---------- */
+.calendar {
+  width: min(760px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  border: 0;
+  border-radius: 24px;
+  padding: 20px 22px 16px;
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: 0 20px 60px rgba(35, 33, 58, 0.35);
+}
+.calendar::backdrop { background: rgba(35, 33, 58, 0.45); }
+.cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.cal-head h2 { margin: 0; font-size: 1.6rem; }
+.cal-close {
+  border: 0;
+  background: var(--ink);
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+.cal-dow { text-align: center; font-weight: 700; font-size: 0.8rem; color: var(--soft); text-transform: uppercase; }
+.cal-day {
+  font: inherit;
+  color: #fff;
+  text-align: left;
+  min-height: 92px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--land);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.cal-day.sea { background: var(--sea); }
+.cal-day.air { background: var(--air); }
+button.cal-day:hover { transform: translateY(-2px); }
+.cal-day.off { background: rgba(35, 33, 58, 0.06); color: var(--soft); cursor: default; }
+.cal-day { position: relative; }
+.cal-day.today { box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px var(--today); }
+.cal-pin {
+  position: absolute;
+  top: -14px;
+  right: -8px;
+  width: 34px;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 2px 3px rgba(35, 33, 58, 0.4));
+  animation: hop 1.2s ease-in-out infinite;
+}
+.cal-num { font-weight: 700; font-size: 0.85rem; }
+.cal-emoji { font-size: 1.5rem; line-height: 1.1; }
+.cal-place {
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.15;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.calendar .tiny { margin: 12px 0 0; }
+
+@media (max-width: 600px) {
+  .tools { top: 10px; right: 10px; }
+  .tools button { padding: 8px 12px; }
+  /* icon only on phones, but keep the words for screen readers */
+  .tools .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  body.is-overview #overview-btn .label { position: static; width: auto; height: auto; clip-path: none; }
+  .calendar { padding: 16px 12px 12px; }
+  .cal-grid { gap: 4px; }
+  .cal-day { min-height: 58px; padding: 4px; align-items: center; text-align: center; }
+  .cal-place { display: none; }
+  .cal-num { font-size: 0.72rem; }
+  .cal-emoji { font-size: 1.2rem; }
+  .overview-hint { white-space: normal; width: calc(100vw - 32px); text-align: center; border-radius: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero, main, .scrim, .overview-hint, .cal-day, .stop span { transition: none; }
+  .stop .pin, .cal-pin, .dot .us, .dot .base::after { animation: none; }
+}
+.tools button[hidden] { display: none; }
+
+/* ---------- Time zones ---------- */
+.tznote {
+  margin: 0 0 14px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(47, 128, 237, 0.08);
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+.day.today .tznote { background: rgba(255, 255, 255, 0.55); }
+
+.sched .what { display: flex; flex-direction: column; }
+.sched .yours { color: var(--soft); font-size: 0.82rem; font-weight: 700; }
+.day.today .sched .yours { color: rgba(35, 33, 58, 0.7); }
+
+.clocks {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  translate: -50% 0;
+  z-index: 20;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 18px;
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(35, 33, 58, 0.3);
+  max-width: calc(100vw - 32px);
+}
+.clock {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 14px;
+  border-radius: 14px;
+  min-width: 0;
+}
+.clock.them { background: rgba(255, 255, 255, 0.1); }
+.clocks.new-day .clock.them { background: var(--today); color: var(--ink); }
+.clock-who { font-size: 0.75rem; font-weight: 700; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.clock-time { font: 700 1rem "Fredoka", "Nunito", sans-serif; white-space: nowrap; }
+
+/* The overview hint sits above the clocks */
+.overview-hint { bottom: 96px; }
+/* Leave room at the end of the page so the clocks never cover the footer */
+main { padding-bottom: calc(20vh + 80px); }
+
+@media (max-width: 600px) {
+  .clocks { bottom: 34px; width: calc(100vw - 20px); max-width: none; }
+  .clock { flex: 1 1 0; padding: 5px 10px; }
+  .clock-time { font-size: 0.88rem; white-space: normal; line-height: 1.2; }
+  .overview-hint { bottom: 110px; }
+}
+
+/* ---------- Party ---------- */
+.party {
+  margin: 0 0 16px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  text-align: center;
+  background:
+    radial-gradient(circle at 12% 30%, rgba(255, 255, 255, 0.35) 0 3px, transparent 4px),
+    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.35) 0 3px, transparent 4px),
+    radial-gradient(circle at 55% 20%, rgba(255, 255, 255, 0.3) 0 2px, transparent 3px),
+    linear-gradient(120deg, #E0529C, #FF8A3D 45%, #FFD23F);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(224, 82, 156, 0.35);
+}
+.party p { margin: 0; font-weight: 700; text-shadow: 0 1px 2px rgba(35, 33, 58, 0.25); }
+.party-title {
+  font-family: "Fredoka", "Nunito", sans-serif;
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  line-height: 1.15;
+  margin-bottom: 4px !important;
+}
+.party-title span { display: inline-block; animation: wiggle 1.6s ease-in-out infinite; }
+.party-title span:last-child { animation-delay: 0.8s; }
+@keyframes wiggle {
+  0%, 100% { rotate: -10deg; }
+  50% { rotate: 10deg; }
+}
+
+.balloons {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  overflow: hidden;
+}
+.balloons span {
+  position: absolute;
+  bottom: -80px;
+  animation-name: float-up;
+  animation-timing-function: ease-in;
+  animation-fill-mode: both;
+}
+@keyframes float-up {
+  0% { transform: translate(0, 0) rotate(-6deg); opacity: 0; }
+  10% { opacity: 1; }
+  50% { transform: translate(24px, -55vh) rotate(6deg); }
+  100% { transform: translate(-16px, -120vh) rotate(-6deg); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .party-title span { animation: none; }
+}
+
+/* ---------- Narrow screens: story-map layout ----------
+   The focused tile sits at the bottom, above the clocks, and the map shows
+   through the gap above it. Details fold away behind "Show more". */
+.more-btn { display: none; }
+
+@media (max-width: 899px) {
+  body { font-size: 15px; }
+  .scrim { background: none; }
+
+  /* Space before the first day so the title panel is gone by the time it's in focus */
+  main { padding-top: 45vh; padding-bottom: 40vh; }
+  .day { padding: 0 0 60vh 42px; }
+  .day::before { left: 15px; border-left-width: 4px; }
+  .node {
+    top: calc(50% - 30vh - 18px);
+    margin-top: 0;
+    width: 36px;
+    height: 36px;
+    font-size: 1.05rem;
+    border-width: 3px;
+  }
+
+  .card {
+    min-height: 0;
+    padding: 16px 18px 12px;
+    border-radius: 20px;
+    scroll-snap-align: end;
+    scroll-margin-bottom: 96px;
+    scroll-margin-top: 64px;
+    transform-origin: center bottom;
+    box-shadow: 0 8px 30px rgba(35, 33, 58, 0.25);
+  }
+  .when { font-size: 0.82rem; gap: 0 10px; }
+  .card h2 { font-size: 1.45rem; margin: 4px 0 6px; }
+  .blurb { font-size: 1rem; margin-bottom: 10px; }
+  .sub h3 { font-size: 1rem; }
+  .tznote { font-size: 0.84rem; margin-bottom: 10px; padding: 5px 10px; }
+  .sched { gap: 4px 12px; margin-bottom: 10px; }
+  .sched .yours { font-size: 0.78rem; }
+  .where { font-size: 0.9rem; padding: 8px 12px; }
+  .party { padding: 10px 12px; margin-bottom: 10px; }
+  .party-title { font-size: 1.25rem; }
+  .party p:not(.party-title) { font-size: 0.9rem; }
+
+  /* Folded: just the headline and the first blurb */
+  .day:not(.open) :is(.tznote, .sched, .where, .sub + .sub, .sub h3) { display: none; }
+  .day:not(.open) .blurb {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+  /* In a multi-day tile, folded shows today's part, not the first day */
+  .day.today:not(.open) .sub:not(.today) { display: none; }
+  .day.today:not(.open) .sub.today { display: block; }
+  .more-btn {
+    display: block;
+    margin: 6px auto 0;
+    padding: 6px 14px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(35, 33, 58, 0.07);
+    color: var(--ink);
+    font: 700 0.85rem "Nunito", system-ui, sans-serif;
+    cursor: pointer;
+  }
+  .day.today .more-btn { background: rgba(255, 255, 255, 0.6); }
+  .more-btn:focus-visible { outline: 3px solid var(--sea); outline-offset: 2px; }
+
+  footer { margin-bottom: 20px; }
+}
+
+@media (max-width: 600px) {
+  .clocks { bottom: 30px; }
+  .clock { padding: 5px 10px; }
+  .clock-time { white-space: nowrap; font-size: 0.9rem; }
+}

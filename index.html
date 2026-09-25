@@ -1,0 +1,790 @@
+---
+permalink: /map/
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ site.title }}</title>
+  <meta name="description" content="{{ site.description }}">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="{{ '/assets/style.css' | relative_url }}?v={{ site.time | date: '%s' }}">
+</head>
+<body>
+
+<div class="balloons" id="balloons" aria-hidden="true"></div>
+
+<div class="backdrop" aria-hidden="true">
+  <div id="map"></div>
+  <div class="ship" id="ship" style="background-image: url('{{ site.ship_photo }}')"></div>
+  <div class="scrim"></div>
+</div>
+
+<nav class="tools" aria-label="Views">
+  <button type="button" id="start-btn"><span aria-hidden="true">⏮️</span> <span class="label">Start</span></button>
+  <button type="button" id="today-btn" hidden><img class="us-icon" src="{{ '/assets/img/us.png' | relative_url }}" alt=""> <span class="label">Today</span></button>
+  <button type="button" id="overview-btn" aria-pressed="false"><span aria-hidden="true">🗺️</span> <span class="label">Overview</span></button>
+  <button type="button" id="calendar-btn" aria-haspopup="dialog"><span aria-hidden="true">📅</span> <span class="label">Calendar</span></button>
+</nav>
+
+<aside class="clocks" id="clocks" aria-label="What time is it?">
+  <div class="clock">
+    <span class="clock-who">🏠 Your time</span>
+    <span class="clock-time" id="clock-you">&nbsp;</span>
+  </div>
+  <div class="clock them">
+    <span class="clock-who" id="clock-them-who">🧳 {{ site.travelers }}</span>
+    <span class="clock-time" id="clock-them">&nbsp;</span>
+  </div>
+</aside>
+
+<p class="overview-hint" id="overview-hint">Tap a stop to zoom in. Drag and zoom to explore.</p>
+
+<dialog class="calendar" id="calendar" aria-labelledby="calendar-title">
+  <div class="cal-head">
+    <h2 id="calendar-title">The whole trip</h2>
+    <button type="button" class="cal-close" id="calendar-close" aria-label="Close calendar">✕</button>
+  </div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <p class="tiny">Tap a day to jump to it.</p>
+</dialog>
+
+<header class="hero">
+  <div class="hero-panel">
+    <p class="boat" aria-hidden="true">🛫 🇰🇷 🚢 🇯🇵 🛬</p>
+    <h1>{{ site.title }}</h1>
+    <p class="status" id="status">Sep 29 to Oct 20, 2026. Scroll down to follow along.</p>
+    <a class="jump" id="jump" href="#" hidden><img class="us-icon" src="{{ '/assets/img/us.png' | relative_url }}" alt=""> Where are they today?</a>
+    <p class="legend">
+      <span class="key land">🌿 on land</span>
+      <span class="key sea">🌊 at sea</span>
+      <span class="key air">✈️ in the air</span>
+      <span class="tiny">All times are local. Tap an address to open it in Maps.</span>
+    </p>
+  </div>
+</header>
+
+<main id="main">
+  {% comment %}
+    Back-to-back days with the same title and map spot share one tile.
+    Each day still gets its own section (and #day-YYYY-MM-DD anchor) inside it.
+  {% endcomment %}
+  {% assign all = site.data.days %}
+  {% assign gend = -1 %}
+  <ol class="timeline">
+    {% for day in all %}
+    {% assign i = forloop.index0 %}
+    {% if i > gend %}
+      {% capture key %}{{ day.title }}|{{ day.coords | join: ',' }}{% endcapture %}
+      {% assign gcount = 0 %}
+      {% assign gdates = '' %}
+      {% for d in all offset: i %}
+        {% capture dkey %}{{ d.title }}|{{ d.coords | join: ',' }}{% endcapture %}
+        {% if dkey != key %}{% break %}{% endif %}
+        {% assign gcount = gcount | plus: 1 %}
+        {% assign glast = d %}
+        {% capture gdates %}{{ gdates }} {{ d.date | date: '%Y-%m-%d' }}{% endcapture %}
+      {% endfor %}
+      {% assign gfirst = day %}
+      {% assign gend = i | plus: gcount | minus: 1 %}
+    <li class="day {{ day.mode }}" data-dates="{{ gdates | strip }}" data-mode="{{ day.mode }}" data-tz="{{ day.tz }}"{% if day.coords %} data-coords="{{ day.coords | jsonify }}"{% endif %}{% if day.route %} data-route="{{ day.route | jsonify }}"{% endif %}>
+      <span class="node" aria-hidden="true">{{ day.emoji }}</span>
+      <div class="card">
+        <p class="when">
+          {% if gcount > 1 %}
+          <strong>{{ day.date | date: "%a, %b %-d" }} – {{ glast.date | date: "%a, %b %-d" }}</strong>
+          <span>Days {{ i | plus: 1 }}–{{ gend | plus: 1 }} of {{ all.size }}</span>
+          {% else %}
+          <strong>{{ day.date | date: "%A, %B %-d" }}</strong>
+          <span>Day {{ i | plus: 1 }} of {{ all.size }}</span>
+          {% endif %}
+          <span class="here-tag"><img class="us-icon" src="{{ '/assets/img/us.png' | relative_url }}" alt=""> We are here!</span>
+        </p>
+        <h2>{{ day.title }}</h2>
+        <p class="tznote" hidden></p>
+    {% endif %}
+
+        <section class="sub" id="day-{{ day.date | date: '%Y-%m-%d' }}" data-emoji="{{ day.emoji }}" data-tz="{{ day.tz }}">
+          {% if day.celebrate %}
+          <div class="party">
+            <p class="party-title"><span aria-hidden="true">🎈</span> {{ day.celebrate }} <span aria-hidden="true">🎉</span></p>
+            {% if day.celebrate_note %}<p>{{ day.celebrate_note }}</p>{% endif %}
+          </div>
+          {% endif %}
+          {% if gcount > 1 %}<h3><span aria-hidden="true">{{ day.emoji }}</span> {{ day.date | date: "%A, %B %-d" }}</h3>{% endif %}
+          <p class="blurb">{{ day.blurb }}</p>
+          {% if day.schedule %}
+          <ul class="sched">
+            {% for item in day.schedule %}
+            <li data-time="{{ item.time }}" data-tz="{{ item.tz | default: day.tz }}" data-date="{{ item.date | default: day.date | date: '%Y-%m-%d' }}">
+              <time>{{ item.time }}</time>
+              <div class="what">
+                {% if item.link %}<a href="{{ item.link }}" target="_blank" rel="noopener">{{ item.what }}</a>{% else %}<span>{{ item.what }}</span>{% endif %}
+                <small class="yours" hidden></small>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </section>
+
+    {% if i == gend %}
+        {% assign w = gfirst %}
+        {% if w.port or w.stay or w.sleeping %}
+        <div class="where">
+          {% if w.port %}
+          <p>⚓ Port: <a href="https://www.google.com/maps/search/?api=1&amp;query={{ w.port | url_encode }}" target="_blank" rel="noopener">{{ w.port }}</a></p>
+          {% endif %}
+          {% if w.stay %}
+          <p>🛏️ Staying at <strong>{{ w.stay.name }}</strong><br>
+            <a href="https://www.google.com/maps/search/?api=1&amp;query={{ w.stay.name | append: ', ' | append: w.stay.address | url_encode }}" target="_blank" rel="noopener">{{ w.stay.address }}</a><br>
+            <a href="tel:{{ w.stay.phone | remove: ' ' | remove: '-' }}">📞 {{ w.stay.phone }}</a>
+          </p>
+          {% elsif w.sleeping %}
+          <p>😴 Sleeping: <strong>{{ w.sleeping }}</strong></p>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </li>
+    {% endif %}
+    {% endfor %}
+  </ol>
+
+  <footer>
+    Cruise schedule from <a href="https://www.celebritycruises.com/gb/itinerary/12-night-best-of-japan-south-korea-from-seoul-incheon-on-millennium-ML12I185" target="_blank" rel="noopener">Celebrity Cruises</a>.
+    {{ site.ship_credit }}.
+    Made with love and too many emoji.
+  </footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script>
+(function () {
+  var days = Array.prototype.slice.call(document.querySelectorAll('.day'));
+  var hero = document.querySelector('.hero');
+  var main = document.getElementById('main');
+  var ship = document.getElementById('ship');
+  var US_IMG = '{{ '/assets/img/us.png' | relative_url }}';
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Background map ---------- */
+
+  var map = L.map('map', {
+    zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
+    boxZoom: false, keyboard: false, touchZoom: false, tap: false, zoomSnap: 0.25
+  });
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 18,
+    attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a>, HERE, Garmin, &copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  function parse(el, key) {
+    var v = el.getAttribute('data-' + key);
+    return v ? JSON.parse(v) : null;
+  }
+
+  // Keep each hop of a flight on the short way round (across the Pacific, not the Atlantic).
+  function unwrap(points) {
+    var out = [points[0].slice()];
+    for (var i = 1; i < points.length; i++) {
+      var lng = points[i][1], prev = out[i - 1][1];
+      while (lng - prev > 180) lng -= 360;
+      while (lng - prev < -180) lng += 360;
+      out.push([points[i][0], lng]);
+    }
+    return out;
+  }
+
+  // The whole trip on the ground and at sea, drawn faintly underneath.
+  var tripPoints = [];
+  days.forEach(function (d) {
+    var c = parse(d, 'coords');
+    if (!c) return;
+    var last = tripPoints[tripPoints.length - 1];
+    if (!last || last[0] !== c[0] || last[1] !== c[1]) tripPoints.push(c);
+  });
+  L.polyline(tripPoints, { color: '#23213A', weight: 3, opacity: 0.35, dashArray: '2 8', lineCap: 'round' }).addTo(map);
+
+  var flight = L.polyline([], { color: '#E0529C', weight: 4, opacity: 0.9, dashArray: '1 10', lineCap: 'round' }).addTo(map);
+  // A plain dot for whichever day the reader has scrolled to.
+  var spot = L.marker(tripPoints[0], {
+    icon: L.divIcon({ className: 'spot land', html: '<span></span>', iconSize: [22, 22] }),
+    interactive: false, keyboard: false, opacity: 0
+  }).addTo(map);
+
+  // John and Alessa, standing wherever they really are right now. Scrolling never moves them.
+  var HOME = [39.8744, -75.2424];
+  var us = L.marker(HOME, {
+    icon: L.divIcon({
+      className: 'dot land',
+      html: '<span class="base"></span><img class="us" src="' + US_IMG + '" alt="">',
+      iconSize: [72, 84],
+      iconAnchor: [36, 76]
+    }),
+    interactive: false, keyboard: false, zIndexOffset: 2000
+  }).addTo(map);
+
+  // On wide screens the cards sit on the left, so center things in the space to their right.
+  // On narrow screens the focused card sits at the bottom instead, with the map showing above it.
+  function narrow() { return window.innerWidth < 900; }
+  var CLOCKS_H = 96; // room kept free for the clock bar at the bottom
+  function focusLine() { return narrow() ? window.innerHeight - CLOCKS_H : window.innerHeight / 2; }
+  function cardTop(target) {
+    var card = target && target.querySelector && target.querySelector('.card');
+    return window.innerHeight - CLOCKS_H - (card ? card.offsetHeight : window.innerHeight * 0.4);
+  }
+  function leftPad() {
+    return narrow() ? 0 : main.getBoundingClientRect().right;
+  }
+  function offsetCenter(latlng, zoom, target) {
+    var px = map.project(latlng, zoom);
+    if (narrow()) {
+      // Put the spot midway between the top buttons and the top of the card.
+      var y = Math.max(90, (60 + cardTop(target)) / 2);
+      return map.unproject(px.add([0, window.innerHeight / 2 - y]), zoom);
+    }
+    return map.unproject(px.subtract([leftPad() / 2, 0]), zoom);
+  }
+  function fit(points, target) {
+    var opts = narrow()
+      ? { paddingTopLeft: [30, 70], paddingBottomRight: [30, window.innerHeight - Math.max(200, cardTop(target)) + 20], maxZoom: 9 }
+      : { paddingTopLeft: [leftPad() + 60, 60], paddingBottomRight: [60, 60], maxZoom: 9 };
+    if (reduceMotion) map.fitBounds(points, opts);
+    else map.flyToBounds(points, L.extend({ duration: 1.4 }, opts));
+  }
+  function setSpot(latlng, mode) {
+    if (!latlng) { spot.setOpacity(0); return; }
+    spot.setLatLng(latlng);
+    spot.getElement().className = 'leaflet-marker-icon spot ' + mode;
+    // No need for a dot where John and Alessa are already standing.
+    spot.setOpacity(us.getLatLng().distanceTo(latlng) < 500 ? 0 : 1);
+  }
+
+  var shown = null;
+  function show(target) {
+    if (target === shown) return;
+    shown = target;
+
+    if (target === 'overview') {
+      ship.classList.remove('show');
+      flight.setLatLngs([]);
+      setSpot(null);
+      fit(tripPoints);
+      return;
+    }
+
+    var mode = target.getAttribute('data-mode');
+    ship.classList.toggle('show', mode === 'sea');
+
+    var route = parse(target, 'route');
+    if (route) {
+      route = unwrap(route);
+      flight.setLatLngs(route);
+      setSpot(null);
+      fit(route, target);
+      return;
+    }
+
+    flight.setLatLngs([]);
+    var c = parse(target, 'coords');
+    if (!c) return;
+    setSpot(c, mode);
+    var zoom = mode === 'sea' ? 6 : 10;
+    var center = offsetCenter(c, zoom, target);
+    if (reduceMotion) map.setView(center, zoom);
+    else map.flyTo(center, zoom, { duration: 1.6 });
+  }
+
+  map.fitBounds(tripPoints, { paddingTopLeft: [leftPad() + 60, 60], paddingBottomRight: [60, 60] });
+  shown = 'overview';
+
+  /* ---------- Focus fading while scrolling ---------- */
+
+  var pending = null, timer = null, lastBest = null;
+
+  /* ---------- Party time (days with celebrate:) ---------- */
+
+  var balloons = document.getElementById('balloons');
+  var partying = false;
+  function party() {
+    if (partying || reduceMotion) return;
+    partying = true;
+    if (window.confetti) {
+      var colors = ['#FFD23F', '#E0529C', '#2F80ED', '#34A36B', '#ffffff'];
+      confetti({ particleCount: 90, angle: 60, spread: 70, origin: { x: 0, y: 0.75 }, colors: colors });
+      confetti({ particleCount: 90, angle: 120, spread: 70, origin: { x: 1, y: 0.75 }, colors: colors });
+      setTimeout(function () { confetti({ particleCount: 120, spread: 110, startVelocity: 35, origin: { y: 0.35 }, colors: colors }); }, 450);
+    }
+    var html = '';
+    for (var i = 0; i < 14; i++) {
+      html += '<span style="left:' + (Math.random() * 92 + 2).toFixed(1) + '%;' +
+        'animation-delay:' + (Math.random() * 1.8).toFixed(2) + 's;' +
+        'animation-duration:' + (5 + Math.random() * 3).toFixed(2) + 's;' +
+        'filter:hue-rotate(' + Math.round(Math.random() * 360) + 'deg);' +
+        'font-size:' + (2.2 + Math.random() * 1.6).toFixed(2) + 'rem">🎈</span>';
+    }
+    balloons.innerHTML = html;
+    // Let it finish before it can go again, so scrolling back and forth doesn't spam it.
+    setTimeout(function () { balloons.innerHTML = ''; partying = false; }, 10000);
+  }
+
+  function update() {
+    var mid = focusLine();
+    var best = null, bestDist = Infinity;
+    days.forEach(function (d) {
+      var r = d.querySelector('.card').getBoundingClientRect();
+      // Wide: how far the card's middle is from the middle of the screen. Narrow: its bottom from the bottom.
+      // A card that spans that line (like a tall, opened one being read) counts as fully in focus.
+      var dist = r.top < mid && r.bottom >= mid - 2 ? 0 : Math.abs((narrow() ? r.bottom : r.top + r.height / 2) - mid);
+      // 1 when centered, fading to 0 about 60% of a screen away
+      var f = Math.max(0, 1 - dist / (window.innerHeight * 0.6));
+      d.style.setProperty('--f', f.toFixed(3));
+      if (dist < bestDist) { bestDist = dist; best = d; }
+    });
+    days.forEach(function (d) { d.classList.toggle('focus', d === best); });
+    if (best !== lastBest) {
+      lastBest = best;
+      if (best && best.querySelector('.party')) party();
+    }
+
+    if (overviewOn) return;
+    var target = hero.getBoundingClientRect().bottom > (narrow() ? window.innerHeight / 2 : mid) ? 'overview' : best;
+    // Wait for scrolling to settle a moment so fast flicks don't queue up a dozen flights.
+    if (target !== pending) {
+      pending = target;
+      clearTimeout(timer);
+      timer = setTimeout(function () { show(pending); }, 180);
+    }
+  }
+
+  var ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () { ticking = false; update(); });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', function () { map.invalidateSize(); shown = null; update(); tick(); });
+
+  /* ---------- Where are we today? ---------- */
+
+  // Korea and Japan are both UTC+9, so "today" follows their calendar.
+  var start = Date.parse('2026-09-29T07:05:00-04:00');
+  var end = Date.parse('2026-10-20T18:19:00-04:00');
+  var first = '2026-09-29', last = '2026-10-20';
+  var now = Date.now();
+  var status = document.getElementById('status');
+  var jump = document.getElementById('jump');
+
+  var todayDate = null;
+  function markToday() {
+    var today = new URLSearchParams(location.search).get('date');
+    if (!today) {
+      if (now < start) {
+        var n = Math.ceil((start - now) / 86400000);
+        status.textContent = n + ' more sleep' + (n === 1 ? '' : 's') + ' until wheels up! Sep 29 to Oct 20, 2026.';
+        return;
+      }
+      if (now > end) {
+        status.textContent = 'We made it home! Thanks for following along. 🎉';
+        return;
+      }
+      var k = new Date(now + 9 * 3600000);
+      today = k.getUTCFullYear() + '-' + String(k.getUTCMonth() + 1).padStart(2, '0') + '-' + String(k.getUTCDate()).padStart(2, '0');
+      if (today < first) today = first;
+      if (today > last) today = last;
+    }
+
+    var sub = document.getElementById('day-' + today);
+    if (!sub) return;
+    var el = sub.closest('.day');
+    el.classList.add('today');
+    sub.classList.add('today');
+    todayDate = today;
+    document.getElementById('today-btn').hidden = false;
+    var cheer = sub.querySelector('.party-title');
+    status.textContent = cheer ? cheer.textContent.trim() : 'Right now: ' + el.querySelector('h2').textContent + ' ' + sub.getAttribute('data-emoji');
+    jump.hidden = false;
+    jump.href = '#day-' + today;
+    // Jump straight there once everything has laid out (a smooth scroll this early gets cancelled).
+    window.addEventListener('load', function () {
+      el.querySelector('.card').scrollIntoView({ block: narrow() ? 'end' : 'center', behavior: 'instant' });
+      update();
+    });
+  }
+
+  /* ---------- Shared: jump to a tile ---------- */
+
+  function goTo(date) {
+    var sub = document.getElementById('day-' + date);
+    if (!sub) return;
+    sub.closest('.day').querySelector('.card').scrollIntoView({ block: narrow() ? 'end' : 'center', behavior: reduceMotion ? 'instant' : 'smooth' });
+  }
+
+  /* ---------- Overview: the whole trip, one marker per stop ---------- */
+
+  var overviewOn = false;
+  var overviewBtn = document.getElementById('overview-btn');
+  var stops = L.layerGroup();
+  var zoomControl = L.control.zoom({ position: 'bottomright' });
+  var todayMarker = null;
+  var interactions = ['dragging', 'scrollWheelZoom', 'doubleClickZoom', 'touchZoom', 'boxZoom', 'keyboard'];
+
+  // Built the first time the overview opens, so today's stop is already known.
+  function buildStops() {
+    days.forEach(function (d) {
+      var c = parse(d, 'coords');
+      if (!c) return;
+      var date = d.getAttribute('data-dates').split(' ')[0];
+      var place = d.querySelector('h2').textContent;
+      var when = d.querySelector('.when strong').textContent;
+      var isToday = d.classList.contains('today');
+      var emoji = d.querySelector('.node').textContent.trim();
+
+      var popup = document.createElement('div');
+      popup.className = 'stop-popup';
+      popup.innerHTML = (isToday ? '<p class="here"><img class="us-icon" src="' + US_IMG + '" alt=""> We are here today</p>' : '') +
+        '<strong></strong><span></span><button type="button">Open this day →</button>';
+      popup.querySelector('strong').textContent = emoji + ' ' + place;
+      popup.querySelector('span').textContent = when;
+      popup.querySelector('button').addEventListener('click', function () {
+        setOverview(false);
+        goTo(date);
+      });
+
+      var marker = L.marker(c, {
+        icon: L.divIcon({
+          className: 'stop ' + d.getAttribute('data-mode') + (isToday ? ' today' : ''),
+          html: '<span>' + emoji + '</span>' + '',
+          iconSize: [40, 40]
+        }),
+        title: place + ' · ' + when,
+        riseOnHover: true,
+        zIndexOffset: isToday ? 1000 : 0
+      })
+        .bindPopup(popup, { offset: [0, -14], closeButton: false })
+        .on('click', function () {
+          var zoom = Math.max(map.getZoom(), d.getAttribute('data-mode') === 'sea' ? 7 : 10);
+          if (reduceMotion) map.setView(c, zoom);
+          else map.flyTo(c, zoom, { duration: 1.2 });
+        })
+        .addTo(stops);
+      if (isToday) todayMarker = marker;
+    });
+  }
+
+  function setOverview(on) {
+    if (on === overviewOn) return;
+    overviewOn = on;
+    document.body.classList.toggle('is-overview', on);
+    overviewBtn.setAttribute('aria-pressed', on);
+    overviewBtn.querySelector('.label').textContent = on ? 'Back to days' : 'Overview';
+    startBtn.querySelector('.label').textContent = on ? 'Reset' : 'Start';
+    interactions.forEach(function (h) { map[h][on ? 'enable' : 'disable'](); });
+
+    if (on) {
+      clearTimeout(timer);
+      ship.classList.remove('show');
+      flight.setLatLngs([]);
+      setSpot(null);
+      if (!stops.getLayers().length) buildStops();
+      stops.addTo(map);
+      zoomControl.addTo(map);
+      fitTrip();
+    } else {
+      map.closePopup();
+      map.removeLayer(stops);
+      zoomControl.remove();
+      shown = pending = null;
+      update();
+    }
+  }
+
+  function fitTrip() {
+    var opts = { padding: [70, 70] };
+    if (reduceMotion) map.fitBounds(tripPoints, opts);
+    else map.flyToBounds(tripPoints, L.extend({ duration: 1.2 }, opts));
+  }
+
+  overviewBtn.addEventListener('click', function () { setOverview(!overviewOn); });
+
+  /* ---------- Start and Today buttons ---------- */
+
+  var startBtn = document.getElementById('start-btn');
+  var todayBtn = document.getElementById('today-btn');
+
+  // In the overview, "Reset" zooms back out to the whole trip. Otherwise, back to the top of the page.
+  startBtn.addEventListener('click', function () {
+    if (overviewOn) {
+      map.closePopup();
+      fitTrip();
+    } else {
+      window.scrollTo({ top: 0, behavior: reduceMotion ? 'instant' : 'smooth' });
+    }
+  });
+
+  todayBtn.addEventListener('click', function () {
+    if (!todayDate) return;
+    if (overviewOn && todayMarker) {
+      todayMarker.fire('click');
+      todayMarker.openPopup();
+    } else {
+      goTo(todayDate);
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && overviewOn) setOverview(false);
+  });
+
+  /* ---------- Calendar ---------- */
+
+  var calendar = document.getElementById('calendar');
+  var calGrid = document.getElementById('cal-grid');
+  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  function buildCalendar() {
+    var byDate = {};
+    var subs = Array.prototype.slice.call(document.querySelectorAll('.sub'));
+    subs.forEach(function (sub) {
+      var day = sub.closest('.day');
+      byDate[sub.id.slice(4)] = {
+        emoji: sub.getAttribute('data-emoji'),
+        place: day.querySelector('h2').textContent.split(',')[0],
+        mode: day.getAttribute('data-mode'),
+        today: sub.classList.contains('today')
+      };
+    });
+
+    var html = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(function (w) {
+      return '<div class="cal-dow">' + w + '</div>';
+    }).join('');
+
+    // Whole weeks, Sunday to Saturday, covering the trip. Dates are handled in UTC to dodge DST.
+    var firstDay = new Date(subs[0].id.slice(4) + 'T00:00:00Z');
+    var lastDay = new Date(subs[subs.length - 1].id.slice(4) + 'T00:00:00Z');
+    var d = new Date(firstDay); d.setUTCDate(d.getUTCDate() - d.getUTCDay());
+    var stop = new Date(lastDay); stop.setUTCDate(stop.getUTCDate() + 6 - stop.getUTCDay());
+
+    for (var shownMonth = -1; d <= stop; d.setUTCDate(d.getUTCDate() + 1)) {
+      var iso = d.toISOString().slice(0, 10);
+      var info = byDate[iso];
+      var num = d.getUTCDate();
+      if (d.getUTCMonth() !== shownMonth) { num = months[d.getUTCMonth()] + ' ' + num; shownMonth = d.getUTCMonth(); }
+      if (!info) {
+        html += '<div class="cal-day off"><span class="cal-num">' + num + '</span></div>';
+        continue;
+      }
+      html += '<button type="button" class="cal-day ' + info.mode + (info.today ? ' today' : '') + '" data-date="' + iso + '">' +
+        '<span class="cal-num">' + num + '</span>' +
+        (info.today ? '<img class="cal-pin" src="' + US_IMG + '" alt="We are here today" title="We are here today">' : '') +
+        '<span class="cal-emoji" aria-hidden="true">' + info.emoji + '</span>' +
+        '<span class="cal-place">' + info.place + '</span>' +
+        '</button>';
+    }
+    calGrid.innerHTML = html;
+  }
+
+  calGrid.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-date]');
+    if (!btn) return;
+    calendar.close();
+    setOverview(false);
+    goTo(btn.getAttribute('data-date'));
+  });
+  document.getElementById('calendar-btn').addEventListener('click', function () { calendar.showModal(); });
+  document.getElementById('calendar-close').addEventListener('click', function () { calendar.close(); });
+  // Clicking the dimmed area outside the panel closes it too.
+  calendar.addEventListener('click', function (e) { if (e.target === calendar) calendar.close(); });
+
+  /* ---------- Time zones: yours vs. theirs ---------- */
+
+  var yourTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  var places = { 'Asia/Seoul': 'Korea', 'Asia/Tokyo': 'Japan', 'America/New_York': 'Philly', 'America/Los_Angeles': 'Seattle' };
+  var HOUR = 3600000;
+
+  // Minutes a zone is ahead of UTC at a given moment.
+  function offset(tz, t) {
+    var p = {};
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'
+    }).formatToParts(new Date(t)).forEach(function (x) { p[x.type] = +x.value; });
+    return (Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute) - Math.floor(t / 60000) * 60000) / 60000;
+  }
+  // The moment a wall-clock time happens in a zone, e.g. ("2026-10-09", 16, 0, "Asia/Tokyo").
+  function instant(date, h, m, tz) {
+    var d = date.split('-');
+    var guess = Date.UTC(+d[0], d[1] - 1, +d[2], h, m);
+    var t = guess - offset(tz, guess) * 60000;
+    return guess - offset(tz, t) * 60000;
+  }
+  function fmt(t, tz, opts) {
+    return new Intl.DateTimeFormat(undefined, L.extend({ timeZone: tz }, opts)).format(new Date(t));
+  }
+  // "2026-10-09" in that zone
+  function dayKey(t, tz) {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(t));
+  }
+  // "the day before" / "the next day" when a moment falls on a different date for you.
+  function dayShift(t, tz) {
+    var diff = Math.round((Date.parse(dayKey(t, yourTz)) - Date.parse(dayKey(t, tz))) / 86400000);
+    return diff < 0 ? ' the day before' : diff > 0 ? ' the next day' : '';
+  }
+  function hoursText(mins) {
+    var h = Math.abs(mins) / 60;
+    return (h % 1 ? h.toFixed(1) : h) + (h === 1 ? ' hour' : ' hours');
+  }
+
+  // Each tile: how far ahead or behind their clock is, for the reader.
+  days.forEach(function (d) {
+    var note = d.querySelector('.tznote');
+    var date = d.getAttribute('data-dates').split(' ')[0];
+    var tz = d.getAttribute('data-tz');
+    if (d.getAttribute('data-mode') === 'air') {
+      note.textContent = '🕐 Travel day: each time below is local to that airport, and we cross the date line.';
+    } else {
+      var noon = instant(date, 12, 0, tz);
+      var diff = offset(tz, noon) - offset(yourTz, noon);
+      var where = places[tz] || tz.split('/').pop().replace(/_/g, ' ');
+      if (!diff) {
+        note.textContent = '🕐 ' + where + ' time, same as yours.';
+      } else {
+        note.textContent = '🕐 ' + where + ' time, ' + hoursText(diff) + (diff > 0 ? ' ahead of' : ' behind') + ' you. ' +
+          'Noon there is ' + fmt(noon, yourTz, { hour: 'numeric', minute: '2-digit' }) + dayShift(noon, tz) + ' for you.';
+      }
+    }
+    note.hidden = false;
+  });
+
+  // Each schedule time: when that is for the reader.
+  Array.prototype.forEach.call(document.querySelectorAll('.sched li[data-time]'), function (li) {
+    var m = li.getAttribute('data-time').match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+    if (!m) return;
+    var h = (+m[1] % 12) + (m[3].toUpperCase() === 'PM' ? 12 : 0);
+    var tz = li.getAttribute('data-tz');
+    var t = instant(li.getAttribute('data-date'), h, +m[2], tz);
+    if (offset(tz, t) === offset(yourTz, t)) return;
+    var out = li.querySelector('.yours');
+    out.textContent = fmt(t, yourTz, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + ' your time';
+    out.hidden = false;
+  });
+
+  // The clocks at the bottom. Where they are depends on where the trip is right now.
+  var flights = [
+    { from: start, to: Date.parse('2026-09-30T16:50:00+09:00'), tz: 'Asia/Seoul', label: '✈️ {who}, flying to Seoul' },
+    { from: Date.parse('2026-10-20T15:15:00+09:00'), to: end, tz: 'America/New_York', label: '✈️ {who}, flying home' }
+  ];
+  var who = {{ site.travelers | jsonify }};
+  var clockYou = document.getElementById('clock-you');
+  var clockThem = document.getElementById('clock-them');
+  var clockThemWho = document.getElementById('clock-them-who');
+  // Previewing a day with ?date= moves the clocks to noon that day.
+  var skew = 0;
+  function setSkew() {
+    if (todayDate && new URLSearchParams(location.search).get('date')) {
+      skew = instant(todayDate, 12, 0, document.getElementById('day-' + todayDate).getAttribute('data-tz')) - Date.now();
+    }
+  }
+
+  function whereNow(t) {
+    for (var i = 0; i < flights.length; i++) {
+      if (t >= flights[i].from && t < flights[i].to) return { tz: flights[i].tz, label: flights[i].label.replace('{who}', who) };
+    }
+    if (t < start || t >= end || !todayDate) return { tz: 'America/New_York', label: '🏠 ' + who + ', in Philly' };
+    var tz = document.getElementById('day-' + todayDate).getAttribute('data-tz');
+    return { tz: tz, label: '🧳 ' + who + ', in ' + (places[tz] || tz) };
+  }
+
+  // Where to stand the avatar: home, today's stop, or partway along a flight.
+  var airDays = days.filter(function (d) { return d.getAttribute('data-route'); });
+  flights[0].route = unwrap(parse(airDays[0], 'route'));
+  flights[1].route = unwrap(parse(airDays[airDays.length - 1], 'route'));
+
+  function along(route, f) {
+    var legs = [], total = 0;
+    for (var i = 1; i < route.length; i++) {
+      var len = Math.hypot(route[i][0] - route[i - 1][0], route[i][1] - route[i - 1][1]);
+      legs.push(len); total += len;
+    }
+    var go = f * total;
+    for (var j = 0; j < legs.length; j++) {
+      if (go <= legs[j]) {
+        var k = legs[j] ? go / legs[j] : 0;
+        return [route[j][0] + (route[j + 1][0] - route[j][0]) * k, route[j][1] + (route[j + 1][1] - route[j][1]) * k];
+      }
+      go -= legs[j];
+    }
+    return route[route.length - 1];
+  }
+
+  function placeUs(t) {
+    var at = HOME, mode = 'land';
+    var fl = flights.filter(function (f) { return t >= f.from && t < f.to; })[0];
+    if (fl) {
+      at = along(fl.route, (t - fl.from) / (fl.to - fl.from));
+      mode = 'air';
+    } else if (t >= start && t < end && todayDate) {
+      var tile = document.getElementById('day-' + todayDate).closest('.day');
+      var route = parse(tile, 'route');
+      at = parse(tile, 'coords') || (t < flights[1].from ? route[0] : route[route.length - 1]);
+      mode = tile.getAttribute('data-mode');
+    }
+    us.setLatLng(at);
+    us.getElement().className = 'leaflet-marker-icon dot ' + mode;
+  }
+
+  function tick() {
+    var t = Date.now() + skew;
+    placeUs(t);
+    var there = whereNow(t);
+    var small = window.innerWidth < 600;
+    var opts = small
+      ? { weekday: 'short', hour: 'numeric', minute: '2-digit' }
+      : { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+    clockYou.textContent = fmt(t, yourTz, opts);
+    var diff = offset(there.tz, t) - offset(yourTz, t);
+    var gap = (diff > 0 ? '+' : '−') + hoursText(diff).replace(' hours', 'h').replace(' hour', 'h');
+    clockThemWho.textContent = small ? there.label.replace(who + ', ', '') : there.label;
+    clockThem.textContent = fmt(t, there.tz, opts) + (diff ? (small ? ' ' + gap : ' (' + gap + ')') : small ? '' : ' (same as you)');
+    document.getElementById('clocks').classList.toggle('new-day', dayKey(t, there.tz) !== dayKey(t, yourTz));
+  }
+
+  /* ---------- Show more (narrow screens keep tiles short) ---------- */
+
+  days.forEach(function (d) {
+    var subs = d.querySelectorAll('.sub').length;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'more-btn';
+    btn.setAttribute('aria-expanded', 'false');
+    var closed = subs > 1 ? 'Show all ' + subs + ' days ▾' : 'Show details ▾';
+    btn.textContent = closed;
+    btn.addEventListener('click', function () {
+      var open = d.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open);
+      btn.textContent = open ? 'Show less ▴' : closed;
+      // Opening: start reading from the top of the tile. Closing: settle it back into place.
+      d.querySelector('.card').scrollIntoView({
+        block: open ? 'start' : narrow() ? 'end' : 'center',
+        behavior: reduceMotion ? 'instant' : 'smooth'
+      });
+    });
+    d.querySelector('.card').appendChild(btn);
+  });
+
+  markToday();
+  buildCalendar();
+  setSkew();
+  tick();
+  setInterval(tick, 15000);
+  update();
+})();
+</script>
+</body>
+</html>

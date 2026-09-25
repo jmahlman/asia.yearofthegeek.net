@@ -293,7 +293,7 @@
       className: 'dot land',
       html: '<span class="base"></span>' +
         '<img class="us" src="' + US_IMG + '" alt="">' +
-        '<span class="bubble" aria-hidden="true">Hi!</span>',
+        '<span class="bubble" aria-hidden="true">Yo!</span>',
       iconSize: [72, 84],
       iconAnchor: [36, 76]
     }),
@@ -840,7 +840,7 @@
     el.classList.add(mode);
     // The speech bubble says hello in the language of wherever we are.
     var hello = { 'Asia/Seoul': ['안녕하세요!', 'ko'], 'Asia/Tokyo': ['こんにちは!', 'ja'] };
-    var say = (!fl && tile && hello[tile.getAttribute('data-tz')]) || ['Hi!', 'en'];
+    var say = (!fl && tile && hello[tile.getAttribute('data-tz')]) || ['Yo!', 'en'];
     var bubble = el.querySelector('.bubble');
     bubble.textContent = say[0];
     bubble.lang = say[1];

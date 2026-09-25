@@ -9,7 +9,7 @@ It's a plain Jekyll site with no plugins, so GitHub Pages builds it on its own. 
 - **Day tiles.** One tile per stop, in order. Back-to-back days in the same place (same `title` and `coords`) are merged into one tile, with a section per day inside it.
 - **Background map.** As you scroll, the map glides to the day in focus and marks it with a small dot. Sea days fade to a photo of the Celebrity Millennium, and travel days zoom out to show the flight path. The tiles before and after the focused one fade out.
 - **Our avatar (the tracker).** The pixel-art us in `assets/img/us.png` stands wherever we *actually* are right now. It does not follow the reader's scrolling. Before and after the trip it's at home in Philly. During flights it moves along the flight path in real time.
-- **SNES-style moves.** The avatar idles with a two-frame pixel bounce, and jumps with a speech bubble saying hello in the local language (안녕하세요! in Korea, こんにちは! in Japan, Hi! at home or flying) when the map arrives at where we are, or when tapped.
+- **SNES-style moves.** The avatar idles with a two-frame pixel bounce, and jumps with a speech bubble saying hello in the local language (안녕하세요! in Korea, こんにちは! in Japan, Yo! at home or flying) when the map arrives at where we are, or when tapped.
 - **Buttons (top right).**
   - **Start**: back to the top of the page. In the overview it reads **Reset** and zooms back out to the whole trip.
   - **Today**: jumps to today's tile, or zooms to today's stop in the overview. Only shown during the trip.

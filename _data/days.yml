@@ -86,6 +86,10 @@
   schedule:
     - time: "5:00 PM"
       what: Check in at Stay Jakjeon
+    # Kickoff is 1:00 PM EDT Sunday, which is 2:00 AM Monday in Korea
+    - time: "2:00 AM"
+      what: Looking for a bar to watch the Eagles game 🦅
+      date: 2026-10-05
   stay: &jakjeon
     name: Stay Jakjeon
     address: 1F, 8-1 Hyoseo-ro 229beon-gil, Gyeyang-gu, Incheon 21047, South Korea
@@ -187,6 +191,10 @@
   coords: [33.9, 134.3]  # somewhere off Shikoku
   title: At sea
   blurb: Sailing toward Osaka. Napping at a professional level.
+  schedule:
+    # Kickoff is 9:30 AM EDT Sunday, which is 10:30 PM the same day in Japan
+    - time: "10:30 PM"
+      what: Hoping the Wi-Fi aboard lets us watch the Birds 🦅
   sleeping: Celebrity Millennium
 
 - date: 2026-10-12
@@ -234,10 +242,14 @@
   schedule:
     - time: "7:00 AM"
       what: Arrive in port
-    - time: "Excursion"
+    - time: "8:00 AM"
+      what: Hakone excursion sets off (6 to 8 hours)
+    - time: "Then"
       what: Hakone Ropeway, gliding over the steaming vents of Owakudani
-    - time: "Excursion"
+    - time: "Then"
       what: Boat cruise across Lake Ashi
+    - time: "Afternoon"
+      what: Back on board
     - time: "6:00 PM"
       what: Ship sails
   port: Shimizu Port, Shizuoka, Japan
@@ -280,6 +292,11 @@
   coords: [35.6275, 139.7430]
   title: Tokyo, Japan
   blurb: Free day. Sushi, vending machines, getting lost on purpose.
+  schedule:
+    # Kickoff is 1:00 PM EDT Sunday, which is 2:00 AM Monday in Japan
+    - time: "2:00 AM"
+      what: Looking for a bar to watch the Eagles game 🦅
+      date: 2026-10-19
   stay: *strings
 
 - date: 2026-10-19

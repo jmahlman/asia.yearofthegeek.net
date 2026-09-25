@@ -230,7 +230,15 @@
   var hero = document.querySelector('.hero');
   var main = document.getElementById('main');
   var ship = document.getElementById('ship');
-  var US_IMG = '{{ '/assets/img/us.png' | relative_url }}';
+  // Two versions of us: the everyday one, and chibi us for while we're in Asia.
+  var US_HOME = '{{ '/assets/img/us.png' | relative_url }}';
+  var US_ASIA = '{{ '/assets/img/us-chibi.png' | relative_url }}';
+  var US_IMG = US_HOME;
+  function setAvatar(src) {
+    if (src === US_IMG) return;
+    US_IMG = src;
+    Array.prototype.forEach.call(document.querySelectorAll('img.us-icon, img.us, img.cal-pin'), function (img) { img.src = src; });
+  }
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------- Background map ---------- */
@@ -799,6 +807,8 @@
     }
     us.setLatLng(at);
     us.getElement().className = 'leaflet-marker-icon dot ' + mode;
+    // Chibi from landing in Seoul until takeoff from Tokyo.
+    setAvatar(t >= flights[0].to && t < flights[1].from ? US_ASIA : US_HOME);
   }
 
   function tick() {

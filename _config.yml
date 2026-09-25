@@ -15,3 +15,7 @@ ship_credit: 'Ship photo: <a href="https://commons.wikimedia.org/wiki/File:Celeb
 
 # Who the "their time" clock is for
 travelers: "John and Alessa"
+
+# The wrap-up tile, shown once the trip is over
+home_title: "We're home!"
+home_message: "Thanks for following along. We're unpacking, doing a mountain of laundry, and already missing the ramen. Photos coming soon."

@@ -715,3 +715,38 @@ main { padding-bottom: calc(20vh + 80px); }
   .clock { padding: 5px 10px; }
   .clock-time { white-space: nowrap; font-size: 0.9rem; }
 }
+
+/* ---------- Wrap-up tile (after the trip) ---------- */
+.finale .card {
+  background:
+    radial-gradient(circle at 90% 10%, rgba(255, 210, 63, 0.35), transparent 45%),
+    radial-gradient(circle at 5% 95%, rgba(52, 163, 107, 0.18), transparent 50%),
+    var(--card);
+}
+.stats {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+.stats li {
+  background: var(--bg);
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-weight: 700;
+  color: var(--soft);
+  font-size: 0.9rem;
+}
+.stats b {
+  display: block;
+  font: 700 1.6rem "Fredoka", "Nunito", sans-serif;
+  color: var(--ink);
+  line-height: 1.1;
+}
+@media (max-width: 899px) {
+  .stats { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .stats li { padding: 8px; font-size: 0.78rem; }
+  .stats b { font-size: 1.25rem; }
+}

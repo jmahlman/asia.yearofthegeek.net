@@ -153,6 +153,30 @@
     </li>
     {% endif %}
     {% endfor %}
+
+    {% comment %} The wrap-up. The script removes it until the trip is over. {% endcomment %}
+    {% assign ports = all | map: 'port' | compact | uniq %}
+    {% assign sea_days = all | where: 'mode', 'sea' %}
+    {% assign parties = all | map: 'celebrate' | compact %}
+    <li class="day land finale" id="home" data-mode="land" data-coords="[39.8744, -75.2424]" hidden>
+      <span class="node" aria-hidden="true">🏠</span>
+      <div class="card">
+        <p class="when">
+          <strong>After {{ all.last.date | date: "%B %-d" }}</strong>
+          <span>The end</span>
+        </p>
+        <h2>{{ site.home_title }}</h2>
+        <p class="blurb">{{ site.home_message }}</p>
+        <ul class="stats">
+          <li><b>{{ all.size }}</b> days</li>
+          <li><b data-stat="countries">&nbsp;</b> countries</li>
+          <li><b>{{ ports.size }}</b> ports</li>
+          <li><b>{{ sea_days.size }}</b> days at sea</li>
+          <li><b data-stat="miles">&nbsp;</b> miles flown</li>
+          {% if parties.size > 0 %}<li><b>{{ parties.size }}</b> {% if parties.size == 1 %}party{% else %}parties{% endif %} 🎉</li>{% endif %}
+        </ul>
+      </div>
+    </li>
   </ol>
 
   <footer>
@@ -166,7 +190,18 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script>
 (function () {
-  var days = Array.prototype.slice.call(document.querySelectorAll('.day'));
+  // Once the trip is over (or when previewing a date after it), show the wrap-up tile at the end.
+  var TRIP_END = Date.parse('2026-10-20T18:19:00-04:00');
+  var LAST_DAY = '2026-10-20';
+  var previewDate = new URLSearchParams(location.search).get('date');
+  var tripOver = previewDate ? previewDate > LAST_DAY : Date.now() > TRIP_END;
+  var finale = document.getElementById('home');
+  if (tripOver) finale.hidden = false;
+  else finale.remove();
+
+  // tiles: everything that can scroll into focus. days: just the trip days.
+  var tiles = Array.prototype.slice.call(document.querySelectorAll('.day'));
+  var days = tiles.filter(function (d) { return d !== finale; });
   var hero = document.querySelector('.hero');
   var main = document.getElementById('main');
   var ship = document.getElementById('ship');
@@ -281,6 +316,8 @@
 
     var mode = target.getAttribute('data-mode');
     ship.classList.toggle('show', mode === 'sea');
+    // Only once scrolling has settled here, so zooming past the birthday doesn't set it off.
+    if (target.querySelector('.party')) party();
 
     var route = parse(target, 'route');
     if (route) {
@@ -306,7 +343,7 @@
 
   /* ---------- Focus fading while scrolling ---------- */
 
-  var pending = null, timer = null, lastBest = null;
+  var pending = null, timer = null;
 
   /* ---------- Party time (days with celebrate:) ---------- */
 
@@ -337,7 +374,7 @@
   function update() {
     var mid = focusLine();
     var best = null, bestDist = Infinity;
-    days.forEach(function (d) {
+    tiles.forEach(function (d) {
       var r = d.querySelector('.card').getBoundingClientRect();
       // Wide: how far the card's middle is from the middle of the screen. Narrow: its bottom from the bottom.
       // A card that spans that line (like a tall, opened one being read) counts as fully in focus.
@@ -347,11 +384,7 @@
       d.style.setProperty('--f', f.toFixed(3));
       if (dist < bestDist) { bestDist = dist; best = d; }
     });
-    days.forEach(function (d) { d.classList.toggle('focus', d === best); });
-    if (best !== lastBest) {
-      lastBest = best;
-      if (best && best.querySelector('.party')) party();
-    }
+    tiles.forEach(function (d) { d.classList.toggle('focus', d === best); });
 
     if (overviewOn) return;
     var target = hero.getBoundingClientRect().bottom > (narrow() ? window.innerHeight / 2 : mid) ? 'overview' : best;
@@ -376,23 +409,26 @@
 
   // Korea and Japan are both UTC+9, so "today" follows their calendar.
   var start = Date.parse('2026-09-29T07:05:00-04:00');
-  var end = Date.parse('2026-10-20T18:19:00-04:00');
-  var first = '2026-09-29', last = '2026-10-20';
+  var end = TRIP_END;
+  var first = '2026-09-29', last = LAST_DAY;
   var now = Date.now();
   var status = document.getElementById('status');
   var jump = document.getElementById('jump');
 
   var todayDate = null;
   function markToday() {
-    var today = new URLSearchParams(location.search).get('date');
+    if (tripOver) {
+      status.textContent = 'We made it home! Thanks for following along. 🎉';
+      jump.hidden = false;
+      jump.href = '#home';
+      jump.innerHTML = '<img class="us-icon" src="' + US_IMG + '" alt=""> See how it ended';
+      return;
+    }
+    var today = previewDate;
     if (!today) {
       if (now < start) {
         var n = Math.ceil((start - now) / 86400000);
         status.textContent = n + ' more sleep' + (n === 1 ? '' : 's') + ' until wheels up! Sep 29 to Oct 20, 2026.';
-        return;
-      }
-      if (now > end) {
-        status.textContent = 'We made it home! Thanks for following along. 🎉';
         return;
       }
       var k = new Date(now + 9 * 3600000);
@@ -686,7 +722,9 @@
   // Previewing a day with ?date= moves the clocks to noon that day.
   var skew = 0;
   function setSkew() {
-    if (todayDate && new URLSearchParams(location.search).get('date')) {
+    if (tripOver && previewDate) {
+      skew = instant(previewDate, 12, 0, 'America/New_York') - Date.now();
+    } else if (todayDate && previewDate) {
       skew = instant(todayDate, 12, 0, document.getElementById('day-' + todayDate).getAttribute('data-tz')) - Date.now();
     }
   }
@@ -776,6 +814,26 @@
     });
     d.querySelector('.card').appendChild(btn);
   });
+
+  /* ---------- Wrap-up stats ---------- */
+
+  function miles(a, b) {
+    var R = 3958.8, rad = Math.PI / 180;
+    var dLat = (b[0] - a[0]) * rad, dLng = (b[1] - a[1]) * rad;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(a[0] * rad) * Math.cos(b[0] * rad) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+  if (tripOver) {
+    var flown = 0, countries = {};
+    days.forEach(function (d) {
+      var route = parse(d, 'route');
+      if (route) for (var i = 1; i < route.length; i++) flown += miles(route[i - 1], route[i]);
+      else countries[places[d.getAttribute('data-tz')] || d.getAttribute('data-tz')] = true;
+    });
+    finale.querySelector('[data-stat="miles"]').textContent = (Math.round(flown / 100) * 100).toLocaleString();
+    finale.querySelector('[data-stat="countries"]').textContent = Object.keys(countries).length;
+  }
 
   markToday();
   buildCalendar();

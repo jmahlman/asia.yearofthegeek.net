@@ -17,6 +17,7 @@ It's a plain Jekyll site with no plugins, so GitHub Pages builds it on its own. 
 - **Clocks (bottom).** "Your time" (the reader's device) next to our time, with the hour difference and where we are. Our side turns yellow when it's already a different date for us.
 - **Time zone help on every tile.** For example: "Japan time, 13 hours ahead of you. Noon there is 11:00 PM the day before for you." Each schedule time also shows the reader's own time underneath, such as "Thu, Oct 8, 6:00 PM your time".
 - **Today.** During the trip, the page opens on today's tile. It's highlighted yellow and marked "We are here!", and the header says where we are.
+- **After the trip.** Once we've landed back in Philly, the header says we made it home, and a **We're home!** wrap-up tile appears at the end with trip stats (days, countries, ports, days at sea, miles flown, parties). The map zooms to Philly with us standing at home. This tile is the natural spot to add trip photos later.
 - **Parties.** A day with `celebrate:` gets a banner, plus confetti and balloons when it scrolls into focus (Alessa's 40th on Oct 6).
 - **Phones and narrow windows (under 900px).** A "story map" layout: the focused tile sits at the bottom of the screen with the map showing above it. Details fold behind a **Show details** / **Show all N days** button.
 
@@ -60,12 +61,13 @@ Air days use `route:` (a list of `[lat, lng]` stops, e.g. PHL → SEA → ICN) i
 | `url` | `https://asia.yearofthegeek.net` |
 | `travelers` | Name on our clock ("John and Alessa") |
 | `ship_photo`, `ship_credit` | The sea-day background photo and its credit line in the footer |
+| `home_title`, `home_message` | Heading and message on the wrap-up tile after the trip |
 
 ### Hard-coded in `index.html`
 
 If the flights change, update these in the script at the bottom of `index.html`:
 
-- `start` and `end`: the first departure (Sep 29, 7:05 AM Philly) and the final arrival (Oct 20, 6:19 PM Philly)
+- `start` and `TRIP_END`: the first departure (Sep 29, 7:05 AM Philly) and the final arrival (Oct 20, 6:19 PM Philly). After `TRIP_END` the wrap-up tile appears.
 - `flights`: when each flight is in the air (landing in Seoul, and leaving Tokyo), used for the clocks and moving the avatar
 - `HOME`: Philly's coordinates, where the avatar waits before and after the trip
 - "Today" follows the Korea/Japan calendar (UTC+9)
@@ -73,6 +75,7 @@ If the flights change, update these in the script at the bottom of `index.html`:
 ## Previewing
 
 - **Any day as "today":** add `?date=2026-10-06` to the URL. It moves the highlight, the avatar and the clocks (set to noon that day).
+- **After the trip:** use any later date, like `?date=2026-10-21`, to see the wrap-up.
 - **Phone layout:** use a narrow window or your browser's device mode.
 
 ## Run it locally

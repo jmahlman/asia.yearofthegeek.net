@@ -1,1 +1,24 @@
-[]
+[
+ {
+  "id": "73296c0c-9339-4f88-8c58-6fa00d0c6199",
+  "day": "2026-09-29",
+  "taken": "2026-09-29T05:18-04:00",
+  "caption": "Pleasantly surprised to see the Chase lounge open at 5:15!",
+  "by": "John",
+  "src": "/assets/photos/73296c0c-9339-4f88-8c58-6fa00d0c6199.jpg",
+  "thumb": "/assets/photos/73296c0c-9339-4f88-8c58-6fa00d0c6199-thumb.jpg",
+  "w": 1600,
+  "h": 1200
+ },
+ {
+  "id": "4482ac2d-ccc6-4a35-ad01-453de1d35d34",
+  "day": "2026-09-29",
+  "taken": "2026-09-29T06:48-04:00",
+  "caption": "A mostly empty plane. Maybe like 30 people total.",
+  "by": "John",
+  "src": "/assets/photos/4482ac2d-ccc6-4a35-ad01-453de1d35d34.jpg",
+  "thumb": "/assets/photos/4482ac2d-ccc6-4a35-ad01-453de1d35d34-thumb.jpg",
+  "w": 1200,
+  "h": 1600
+ }
+]

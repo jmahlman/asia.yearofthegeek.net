@@ -42,5 +42,170 @@
   "thumb": "/assets/photos/7d9fd6ac-a12c-419d-9a8c-be3540eecee2-thumb.jpg",
   "w": 1600,
   "h": 1200
+ },
+ {
+  "id": "1e675ad1-0e12-4ba5-ba3f-a66246c2477a",
+  "day": "2026-10-01",
+  "taken": "2026-10-01T11:04+09:00",
+  "caption": "Adventuring out to Myeongdong",
+  "by": "John",
+  "src": "/assets/photos/1e675ad1-0e12-4ba5-ba3f-a66246c2477a.jpg",
+  "thumb": "/assets/photos/1e675ad1-0e12-4ba5-ba3f-a66246c2477a-thumb.jpg",
+  "w": 1600,
+  "h": 1200
+ },
+ {
+  "id": "6bfec262-149a-4b8f-99fd-222ab91542a9",
+  "day": "2026-10-01",
+  "taken": "2026-10-01T11:07+09:00",
+  "caption": "Adventuring out to Myeongdong",
+  "by": "John",
+  "src": "/assets/photos/6bfec262-149a-4b8f-99fd-222ab91542a9.jpg",
+  "thumb": "/assets/photos/6bfec262-149a-4b8f-99fd-222ab91542a9-thumb.jpg",
+  "w": 1200,
+  "h": 1600
+ },
+ {
+  "id": "ab2abe89-818a-465f-a293-0362fa9f00da",
+  "day": "2026-10-01",
+  "taken": "2026-10-01T11:33+09:00",
+  "caption": "Adventuring out to Myeongdong",
+  "by": "John",
+  "src": "/assets/photos/ab2abe89-818a-465f-a293-0362fa9f00da.jpg",
+  "thumb": "/assets/photos/ab2abe89-818a-465f-a293-0362fa9f00da-thumb.jpg",
+  "w": 1600,
+  "h": 1200
+ },
+ {
+  "id": "d0baeccc-d8c0-4546-b8bd-2242f80434dc",
+  "day": "2026-10-01",
+  "taken": "2026-10-01T11:46+09:00",
+  "caption": "Adventuring out to Myeongdong",
+  "by": "John",
+  "src": "/assets/photos/d0baeccc-d8c0-4546-b8bd-2242f80434dc.jpg",
+  "thumb": "/assets/photos/d0baeccc-d8c0-4546-b8bd-2242f80434dc-thumb.jpg",
+  "w": 1600,
+  "h": 1200
+ },
+ {
+  "id": "ac18aa14-73dc-4d5b-85c9-3e27e4bcdce3",
+  "day": "2026-10-01",
+  "taken": "2026-10-01T12:53+09:00",
+  "caption": "Adventuring out to Myeongdong",
+  "by": "John",
+  "src": "/assets/photos/ac18aa14-73dc-4d5b-85c9-3e27e4bcdce3.jpg",
+  "thumb": "/assets/photos/ac18aa14-73dc-4d5b-85c9-3e27e4bcdce3-thumb.jpg",
+  "w": 1600,
+  "h": 1200
+ },
+ {
+  "id": "4f1c3cbf-86e5-4bcd-84bd-68293df51211",
+  "day": "2026-10-01",
+  "taken": "2026-10-01T13:09+09:00",
+  "caption": "Adventuring out to Myeongdong",
+  "by": "John",
+  "src": "/assets/photos/4f1c3cbf-86e5-4bcd-84bd-68293df51211.jpg",
+  "thumb": "/assets/photos/4f1c3cbf-86e5-4bcd-84bd-68293df51211-thumb.jpg",
+  "w": 1200,
+  "h": 1600
+ },
+ {
+  "id": "34fec819-7ed6-49b8-842c-42a47cf6cd51",
+  "day": "2026-10-01",
+  "taken": "2026-10-01T13:10+09:00",
+  "caption": "Adventuring out to Myeongdong",
+  "by": "John",
+  "src": "/assets/photos/34fec819-7ed6-49b8-842c-42a47cf6cd51.jpg",
+  "thumb": "/assets/photos/34fec819-7ed6-49b8-842c-42a47cf6cd51-thumb.jpg",
+  "w": 1200,
+  "h": 1600
+ },
+ {
+  "id": "ee29714f-0f94-4831-9737-d2c40728256d",
+  "day": "2026-10-01",
+  "taken": "2026-10-01T13:13+09:00",
+  "caption": "Adventuring out to Myeongdong",
+  "by": "John",
+  "src": "/assets/photos/ee29714f-0f94-4831-9737-d2c40728256d.jpg",
+  "thumb": "/assets/photos/ee29714f-0f94-4831-9737-d2c40728256d-thumb.jpg",
+  "w": 1600,
+  "h": 1200
+ },
+ {
+  "id": "d2811b57-e404-4c13-a109-f7029fc1cd40",
+  "day": "2026-10-01",
+  "taken": "2026-10-01T14:23+09:00",
+  "caption": "Adventuring out to Myeongdong",
+  "by": "John",
+  "src": "/assets/photos/d2811b57-e404-4c13-a109-f7029fc1cd40.jpg",
+  "thumb": "/assets/photos/d2811b57-e404-4c13-a109-f7029fc1cd40-thumb.jpg",
+  "w": 1600,
+  "h": 1200
+ },
+ {
+  "id": "79e68149-ef9c-47f3-9da5-0bc47f560665",
+  "day": "2026-10-01",
+  "taken": "2026-10-01T14:47+09:00",
+  "caption": "Adventuring out to Myeongdong",
+  "by": "John",
+  "src": "/assets/photos/79e68149-ef9c-47f3-9da5-0bc47f560665.jpg",
+  "thumb": "/assets/photos/79e68149-ef9c-47f3-9da5-0bc47f560665-thumb.jpg",
+  "w": 1200,
+  "h": 1600
+ },
+ {
+  "id": "6828afee-11a7-4ee3-bc17-a3b7a9554272",
+  "day": "2026-10-01",
+  "taken": "2026-10-01T16:47+09:00",
+  "caption": "",
+  "by": "",
+  "src": "/assets/photos/6828afee-11a7-4ee3-bc17-a3b7a9554272.jpg",
+  "thumb": "/assets/photos/6828afee-11a7-4ee3-bc17-a3b7a9554272-thumb.jpg",
+  "w": 1200,
+  "h": 1600
+ },
+ {
+  "id": "3e67e65d-52b3-4b7d-b372-f358e97f985a",
+  "day": "2026-10-01",
+  "taken": "2026-10-01T16:49+09:00",
+  "caption": "",
+  "by": "",
+  "src": "/assets/photos/3e67e65d-52b3-4b7d-b372-f358e97f985a.jpg",
+  "thumb": "/assets/photos/3e67e65d-52b3-4b7d-b372-f358e97f985a-thumb.jpg",
+  "w": 1200,
+  "h": 1600
+ },
+ {
+  "id": "cfb2ed63-cbb0-4441-9251-5fcc0acea497",
+  "day": "2026-10-01",
+  "taken": "2026-10-01T19:31+09:00",
+  "caption": "Went to see the rainbow fountain show at the Banpo Bridge.",
+  "by": "John",
+  "src": "/assets/photos/cfb2ed63-cbb0-4441-9251-5fcc0acea497.jpg",
+  "thumb": "/assets/photos/cfb2ed63-cbb0-4441-9251-5fcc0acea497-thumb.jpg",
+  "w": 1600,
+  "h": 1200
+ },
+ {
+  "id": "998799e4-3491-48c0-be52-f7629a66e51c",
+  "day": "2026-10-01",
+  "taken": "2026-10-01T19:43+09:00",
+  "caption": "Went to see the rainbow fountain show at the Banpo Bridge.",
+  "by": "John",
+  "src": "/assets/photos/998799e4-3491-48c0-be52-f7629a66e51c.jpg",
+  "thumb": "/assets/photos/998799e4-3491-48c0-be52-f7629a66e51c-thumb.jpg",
+  "w": 1600,
+  "h": 1200
+ },
+ {
+  "id": "66cb6434-44f3-4403-b192-31101c63988c",
+  "day": "2026-10-01",
+  "taken": "2026-10-01T22:28+09:00",
+  "caption": "Went to see the rainbow fountain show at the Banpo Bridge.",
+  "by": "John",
+  "src": "/assets/photos/66cb6434-44f3-4403-b192-31101c63988c.jpg",
+  "thumb": "/assets/photos/66cb6434-44f3-4403-b192-31101c63988c-thumb.jpg",
+  "w": 1600,
+  "h": 1200
  }
 ]

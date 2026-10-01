@@ -66,34 +66,35 @@
   stay: *mondrian
 
 - date: 2026-10-03
-  emoji: "🧳"
+  emoji: "🏨"
   mode: land
   tz: Asia/Seoul
   coords: [37.5345, 126.9937]
   title: Seoul, South Korea
-  blurb: Pack up the fancy hotel.
+  blurb: Switch hotels! John messed up scheduling, so were staying in Seoul for another 2 nigts! No complaints.
   schedule:
-    - time: "11:00 AM"
+    - time: "2:00 PM"
       what: Check out of the Mondrian
+    - time: "3:00 PM"
+      what: Check in at Lotte City Hotel
+    - time: "5:00 PM"
+      what: Find a bar and get some cocktails and soju
+  stay: &lotte
+    name: Stay Lotte City Hotel Myeongdong
+    address: 362, Samil-daero, Jung-gu Seoul 100-220 KR
+    phone: "+82 02-6112-1000"
 
 - date: 2026-10-04
   emoji: "🛏️"
   mode: land
   tz: Asia/Seoul
-  coords: [37.5363, 126.7236]
-  title: Incheon, South Korea
-  blurb: A cozy night near the port so we do not miss the boat. Literally.
+  coords: [37.5345, 126.9937]
+  title: Seoul, South Korea
+  blurb: Our final night in Seoul. Hoping to make the best of it.
   schedule:
-    - time: "5:00 PM"
-      what: Check in at Stay Jakjeon
-    # Kickoff is 1:00 PM EDT Sunday, which is 2:00 AM Monday in Korea
-    - time: "2:00 AM"
-      what: Looking for a bar to watch the Eagles game 🦅
-      date: 2026-10-05
-  stay: &jakjeon
-    name: Stay Jakjeon
-    address: 1F, 8-1 Hyoseo-ro 229beon-gil, Gyeyang-gu, Incheon 21047, South Korea
-    phone: "+82 10-4371-4387"
+    - time: "8:00 PM"
+      what: Packing up and making sure we don't leave any of the gifts behind!
+  stay: *lotte
 
 - date: 2026-10-05
   emoji: "🚢"
@@ -103,8 +104,8 @@
   title: Incheon, South Korea
   blurb: WE'RE ON A BOAT! WE'RE ON A BOAT! The ship leaves at 5 with or without us. Hopefully with.
   schedule:
-    - time: "By 11:00 AM"
-      what: Check out of Stay Jakjeon
+    - time: "By 9:00 AM"
+      what: Check out of Lotte City Hotel and Uber to Incheon Port
     - time: "Midday"
       what: Board Celebrity Millennium
     - time: "5:00 PM"

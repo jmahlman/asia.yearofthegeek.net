@@ -35,7 +35,7 @@
   mode: land
   tz: Asia/Seoul
   coords: [37.5345, 126.9937]
-  title: Seoul, South Korea
+  title: Seoul, South Korea (Yongsan)
   blurb: Land, find the hotel, pretend we are not jet lagged.
   schedule:
     - time: "4:50 PM"
@@ -52,7 +52,7 @@
   mode: land
   tz: Asia/Seoul
   coords: [37.5345, 126.9937]
-  title: Seoul, South Korea
+  title: Seoul, South Korea (Yongsan)
   blurb: Free day. Korean fried chicken is on the agenda. So is more Korean fried chicken.
   stay: *mondrian
 
@@ -61,7 +61,7 @@
   mode: land
   tz: Asia/Seoul
   coords: [37.5345, 126.9937]
-  title: Seoul, South Korea
+  title: Seoul, South Korea (Yongsan)
   blurb: Palaces, markets, snacks. The official plan is mostly vibes.
   stay: *mondrian
 
@@ -89,7 +89,7 @@
   mode: land
   tz: Asia/Seoul
   coords: [37.5345, 126.9937]
-  title: Seoul, South Korea
+  title: Seoul, South Korea (Myeongdong)
   blurb: Our final night in Seoul. Hoping to make the best of it.
   schedule:
     - time: "8:00 PM"

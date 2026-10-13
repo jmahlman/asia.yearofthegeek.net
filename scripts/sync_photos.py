@@ -154,12 +154,26 @@ def main() -> None:
     allowed = {u.strip() for u in os.environ.get("PHOTO_UPLOADERS", "").split(",") if u.strip()} or {owner}
     days = trip_days()
 
-    masters = {r["recordName"]: r for r in records if r["recordType"] == "CPLMaster" and not r.get("deleted")}
-    captions = {r["recordName"]: field(r, "caption", "") for r in records if r["recordType"] == "CPLPost"}
-
-    PHOTO_DIR.mkdir(parents=True, exist_ok=True)
-    photos, skipped = [], {"outside trip": 0, "hidden": 0, "video": 0, "not allowed": 0}
-    strangers = {}
+    # build masters and captions defensively
+    masters = {}
+    captions = {}
+    _skipped_record_count = 0
+    for r in records:
+        rtype = r.get("recordType")
+        rname = r.get("recordName")
+        if not rtype or not rname:
+            _skipped_record_count += 1
+            continue
+        if not r.get("deleted") and rtype == "CPLMaster":
+            masters[rname] = r
+        if rtype == "CPLPost":
+            captions[rname] = field(r, "caption", "")
+    
+    if _skipped_record_count:
+        print(f"skipped {_skipped_record_count} records with missing recordType/recordName")
+        PHOTO_DIR.mkdir(parents=True, exist_ok=True)
+        photos, skipped = [], {"outside trip": 0, "hidden": 0, "video": 0, "not allowed": 0}
+        strangers = {}
 
     for asset in records:
         if asset["recordType"] != "CPLAsset" or asset.get("deleted"):

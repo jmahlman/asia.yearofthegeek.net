@@ -176,7 +176,7 @@ def main() -> None:
         strangers = {}
 
     for asset in records:
-        if asset["recordType"] != "CPLAsset" or asset.get("deleted"):
+        if asset.get("recordType") != "CPLAsset" or asset.get("deleted"):
             continue
         if field(asset, "isHidden", 0) or field(asset, "trashReason", 0):
             skipped["hidden"] += 1
